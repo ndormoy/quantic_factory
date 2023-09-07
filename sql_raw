@@ -1,0 +1,54 @@
+Customer
+-
+CustomerID PK bigint #AUTOINCREMENT UNSIGNED
+ClientCustomerID bigint #UNSIGNED
+InsertDate timestamp
+
+CustomerData
+-
+CustomerChannelID PK bigint #AUTOINCREMENT UNSIGNED
+CustomerID bigint FK >- Customer.CustomerID #UNSIGNED
+ChannelTypeID smallint FK >- ChannelType.ChannelTypeID #UNSIGNED
+ChannelValue varchar(600)
+InsertDate timestamp
+
+CustomerEvent
+-
+EventID PK bigint #AUTOINCREMENT UNSIGNED
+ClientEventID bigint #UNSIGNED
+InsertDate timestamp
+
+CustomerEventData
+-
+EventDataId PK bigint #AUTOINCREMENT UNSIGNED
+EventID bigint FK >- CustomerEvent.EventID #UNSIGNED
+ContentID int FK >- Content.ContentID #UNSIGNED
+CustomerID bigint FK >- Customer.CustomerID #UNSIGNED
+EventTypeID smallint FK >- EventType.EventTypeID #UNSIGNED
+EventDate timestamp
+Quantity smallint #UNSIGNED
+InsertDate timestamp
+
+Content
+-
+ContentID PK int AUTOINCREMENT #UNSIGNED
+ClientContentID bigint #UNSIGNED
+InsertDate timestamp
+
+ContentPrice
+-
+ContentPriceID PK mediumint AUTOINCREMENT #UNSIGNED
+ContentID int FK >- Content.ContentID #UNSIGNED
+Price decimal(8,2)
+Currency char(3)
+InsertDate timestamp
+
+ChannelType
+-
+ChannelTypeID PK smallint AUTOINCREMENT #UNSIGNED
+Name varchar(30)
+
+EventType
+-
+EventTypeID PK smallint AUTOINCREMENT #UNSIGNED
+Name varchar(30)
