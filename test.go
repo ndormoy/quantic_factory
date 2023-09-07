@@ -5,9 +5,11 @@ Import github.com/go-sql-driver/mysql
 Permit to import MySQL
 */
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	// Import godotenv
 	"database/sql"
@@ -33,21 +35,45 @@ func getDotEnvVar(key string) string {
 	return os.Getenv(key)
 }
 
+func dsn(login string, password string, ip string, dbName string) string {
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s", login, password, ip, dbName)
+}
+
 func main() {
 	fmt.Println("Hello, World!aaaa")
 	var login string = getDotEnvVar("LOGIN")
 	var password string = getDotEnvVar("PASSWORD")
 	var ip string = getDotEnvVar("IP")
+	var dbname string = "quantic_db"
 	fmt.Println("LOGIN: " + login)
 	fmt.Println("PASSWORD: " + password)
 	fmt.Println("IP: " + ip)
 
 	//Creating the MySQL instance
-	var db_key string = (login + ":" + password + "@tcp(" + ip + ")/testdb")
-	db, err := sql.Open("mysql", db_key)
+	// var db_key string = (login + ":" + password + "@tcp(" + ip + ")/testdb")
+	// db, err := sql.Open("mysql", db_key)
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+	// defer db.Close()
+	// fmt.Println("Success!, Database MySQL is connected")
+	db, err := sql.Open("mysql", dsn(login, password, ip, "quantic_db"))
 	if err != nil {
-		panic(err.Error())
+		log.Printf("Error %s when opening DB\n", err)
+		return
 	}
-	defer db.Close()
-	fmt.Println("Success!, Database MySQL is connected")
+
+	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelfunc()
+	res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS "+dbname)
+	if err != nil {
+		log.Printf("Error %s when creating DB\n", err)
+		return
+	}
+	no, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("Error %s when fetching rows", err)
+		return
+	}
+	log.Printf("rows affected: %d\n", no)
 }
