@@ -39,6 +39,33 @@ func dsn(login string, password string, ip string, dbName string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s", login, password, ip, dbName)
 }
 
+func initializeQuanticDB(login, password, ip, dbname string) (*sql.DB, error) {
+    // Open the connection to 'mysql' database and create 'quantic_db'
+    db, err := sql.Open("mysql", dsn(login, password, ip, "mysql"))
+    if err != nil {
+        return nil, err
+    }
+    
+    ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancelfunc()
+    
+    _, err = db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS "+dbname)
+    if err != nil {
+        db.Close() // Close the connection to 'mysql' database
+        return nil, err
+    }
+    
+    // Open the connection to 'quantic_db'
+    quanticDB, err := sql.Open("mysql", dsn(login, password, ip, dbname))
+    if err != nil {
+        db.Close() // Close the connection to 'mysql' database
+        return nil, err
+    }
+    
+    return quanticDB, nil
+}
+
+
 func main() {
 	fmt.Println("Hello, World!aaaa")
 	var login string = getDotEnvVar("LOGIN")
@@ -49,36 +76,34 @@ func main() {
 	fmt.Println("PASSWORD: " + password)
 	fmt.Println("IP: " + ip)
 
-	//Creating the MySQL instance
-	// var db_key string = (login + ":" + password + "@tcp(" + ip + ")/testdb")
-	// db, err := sql.Open("mysql", db_key)
+	// db, err := sql.Open("mysql", dsn(login, password, ip, "mysql"))
 	// if err != nil {
-	// 	panic(err.Error())
+	// 	log.Printf("Error %s when opening DB\n", err)
+	// 	return
+	// }
+
+	// ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancelfunc()
+	// res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS "+dbname)
+	// if err != nil {
+	// 	log.Printf("Error %s when creating DB\n", err)
+	// 	fmt.Println(res)
+	// 	return
+	// }
+	// db.Close() // Close the connection to 'mysql' database
+
+	// db, err = sql.Open("mysql", dsn(login, password, ip, dbname))
+	// if err != nil {
+	// 	log.Printf("Error %s when opening DB\n", err)
+	// 	return
 	// }
 	// defer db.Close()
-	// fmt.Println("Success!, Database MySQL is connected")
-	db, err := sql.Open("mysql", dsn(login, password, ip, "mysql"))
-	if err != nil {
-		log.Printf("Error %s when opening DB\n", err)
-		return
-	}
 
-	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelfunc()
-	// res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS "+dbname)
-	res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS "+dbname)
-	if err != nil {
-		log.Printf("Error %s when creating DB\n", err)
-		fmt.Println(res)
-		return
-	}
-	db.Close() // Close the connection to 'mysql' database
-
-	db, err = sql.Open("mysql", dsn(login, password, ip, dbname))
-	if err != nil {
-		log.Printf("Error %s when opening DB\n", err)
-		return
-	}
-	defer db.Close()
+	quanticDB, err := initializeQuanticDB(login, password, ip, dbname)
+    if err != nil {
+        log.Printf("Error %s when initializing 'quantic_db' DB\n", err)
+        return
+    }
+    defer quanticDB.Close() // Close the connection to 'quantic_db'
 
 }
