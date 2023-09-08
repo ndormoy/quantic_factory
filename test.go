@@ -57,7 +57,7 @@ func main() {
 	// }
 	// defer db.Close()
 	// fmt.Println("Success!, Database MySQL is connected")
-	db, err := sql.Open("mysql", dsn(login, password, ip, "quantic_db"))
+	db, err := sql.Open("mysql", dsn(login, password, ip, "mysql"))
 	if err != nil {
 		log.Printf("Error %s when opening DB\n", err)
 		return
@@ -65,15 +65,20 @@ func main() {
 
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
+	// res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS "+dbname)
 	res, err := db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS "+dbname)
 	if err != nil {
 		log.Printf("Error %s when creating DB\n", err)
+		fmt.Println(res)
 		return
 	}
-	no, err := res.RowsAffected()
+	db.Close() // Close the connection to 'mysql' database
+
+	db, err = sql.Open("mysql", dsn(login, password, ip, dbname))
 	if err != nil {
-		log.Printf("Error %s when fetching rows", err)
+		log.Printf("Error %s when opening DB\n", err)
 		return
 	}
-	log.Printf("rows affected: %d\n", no)
+	defer db.Close()
+
 }
