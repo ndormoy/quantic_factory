@@ -77,35 +77,35 @@ func createDatabaseSchema(db *sql.DB) error {
 	schemaSQL := `
 
 		CREATE TABLE IF NOT EXISTS ChannelType (
-			ChannelTypeID smallint AUTO_INCREMENT NOT NULL,
+			ChannelTypeID smallint UNSIGNED AUTO_INCREMENT NOT NULL,
 			Name varchar(30) NOT NULL,
 			PRIMARY KEY (ChannelTypeID)
 		);
 
 		CREATE TABLE IF NOT EXISTS EventType (
-			EventTypeID smallint AUTO_INCREMENT NOT NULL,
+			EventTypeID smallint UNSIGNED AUTO_INCREMENT NOT NULL,
 			Name varchar(30) NOT NULL,
 			PRIMARY KEY (EventTypeID)
 		);
 
 		CREATE TABLE IF NOT EXISTS Content (
-            ContentID int AUTO_INCREMENT NOT NULL,
-            ClientContentID bigint NOT NULL,
+            ContentID int UNSIGNED AUTO_INCREMENT NOT NULL,
+            ClientContentID bigint UNSIGNED NOT NULL,
             InsertDate timestamp NOT NULL,
             PRIMARY KEY (ContentID)
         );
 
         CREATE TABLE IF NOT EXISTS Customer (
-            CustomerID bigint NOT NULL,
-            ClientCustomerID bigint NOT NULL,
+            CustomerID bigint UNSIGNED AUTO_INCREMENT NOT NULL,
+            ClientCustomerID bigint UNSIGNED NOT NULL,
             InsertDate timestamp NOT NULL,
             PRIMARY KEY (CustomerID)
         );
 
         CREATE TABLE IF NOT EXISTS CustomerData (
-            CustomerChannelID bigint NOT NULL,
-            CustomerID bigint NOT NULL,
-            ChannelTypeID smallint NOT NULL,
+            CustomerChannelID bigint UNSIGNED AUTO_INCREMENT NOT NULL,
+            CustomerID bigint UNSIGNED NOT NULL,
+            ChannelTypeID smallint UNSIGNED NOT NULL,
             ChannelValue varchar(600) NOT NULL,
             InsertDate timestamp NOT NULL,
             PRIMARY KEY (CustomerChannelID),
@@ -114,20 +114,20 @@ func createDatabaseSchema(db *sql.DB) error {
         );
 
         CREATE TABLE IF NOT EXISTS CustomerEvent (
-            EventID bigint NOT NULL,
+            EventID bigint UNSIGNED AUTO_INCREMENT NOT NULL,
             ClientEventID bigint NOT NULL,
             InsertDate timestamp NOT NULL,
             PRIMARY KEY (EventID)
         );
 
         CREATE TABLE IF NOT EXISTS CustomerEventData (
-            EventDataId bigint NOT NULL,
-            EventID bigint NOT NULL,
-            ContentID int NOT NULL,
-            CustomerID bigint NOT NULL,
-            EventTypeID smallint NOT NULL,
+            EventDataId bigint UNSIGNED AUTO_INCREMENT NOT NULL,
+            EventID bigint UNSIGNED NOT NULL,
+            ContentID int UNSIGNED NOT NULL,
+            CustomerID bigint UNSIGNED NOT NULL,
+            EventTypeID smallint UNSIGNED NOT NULL,
             EventDate timestamp NOT NULL,
-            Quantity smallint NOT NULL,
+            Quantity smallint UNSIGNED NOT NULL,
             InsertDate timestamp NOT NULL,
             PRIMARY KEY (EventDataId),
             FOREIGN KEY (EventID) REFERENCES CustomerEvent (EventID),
@@ -137,9 +137,9 @@ func createDatabaseSchema(db *sql.DB) error {
         );
 
         CREATE TABLE IF NOT EXISTS ContentPrice (
-            ContentPriceID mediumint AUTO_INCREMENT NOT NULL,
-            ContentID int NOT NULL,
-            Price decimal(8,2) NOT NULL,
+            ContentPriceID mediumint UNSIGNED AUTO_INCREMENT NOT NULL,
+            ContentID int UNSIGNED NOT NULL,
+            Price decimal(8,2) UNSIGNED NOT NULL,
             Currency char(3) NOT NULL,
             InsertDate timestamp NOT NULL,
             PRIMARY KEY (ContentPriceID),
