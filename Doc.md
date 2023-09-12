@@ -13,3 +13,9 @@ SET GLOBAL local_infile = 'ON';
 
 ProgressBar :
 https://github.com/schollz/progressbar
+
+To compile and run .go
+go run main.go
+
+To compile :
+go build main.go
