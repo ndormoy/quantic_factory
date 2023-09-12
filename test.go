@@ -117,7 +117,7 @@ func initializeQuanticDB(login, password, ip, dbname string) (*sql.DB, error) {
 	return quanticDB, nil
 }
 
-/*Check if database already exists */
+/*Check if database already exists, if the db exists, return the instance of this Db */
 
 func isQuanticDBExists(login, password, ip, dbname string) (*sql.DB, error) {
 	log.Printf("Checking if database exists...")
@@ -364,52 +364,103 @@ func fillAllTables(db *sql.DB) error {
 	return nil
 }
 
+/*
+This function will create the DB, and fill the schema with csv.
+Will file the TypeTable, and the other table.
+*/
+func initAndFill(login string, password string, ip string, dbname string) (*sql.DB, error) {
+	log.Printf("Creating database schema [...]")
+	for _, val := range processBar {
+		fmt.Printf("\r \a%s", val)
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	quanticDB, err := initializeQuanticDB(login, password, ip, dbname)
+	if err != nil {
+		log.Printf("Error %s when initializing 'quantic_db' DB\n", err)
+		return nil, err
+	}
+	defer quanticDB.Close() // Close the connection to 'quantic_db'
+
+	// Create the database schema
+	if err := createDatabaseSchema(quanticDB); err != nil {
+		log.Printf("Error %s when creating database schema\n", err)
+		return nil, err
+	}
+	log.Printf("Done")
+
+	log.Printf("Filling Tables types [...]")
+	if err := createTypesTables(quanticDB); err != nil {
+		// log.Printf("Error %s when creating types tables\n", err)
+		return nil, err
+	}
+	log.Printf("Filling Tables [...]")
+
+	// Import data into tables
+	if err := fillAllTables(quanticDB); err != nil {
+		log.Printf("Error %s when importing data into tables\n", err)
+		return nil, err
+	}
+	log.Printf("Done")
+	return quanticDB, nil
+}
+
 func main() {
 	var login string = getDotEnvVar("LOGIN")
 	var password string = getDotEnvVar("PASSWORD")
 	var ip string = getDotEnvVar("IP")
 	var dbname string = "quantic_db"
+	var quanticDB *sql.DB
 
 	quanticDB, err := isQuanticDBExists(login, password, ip, dbname)
 	if err != nil {
 		log.Printf("Error checking if the database exists: %s\n", err)
 		return
 	}
-	if (quanticDB == nil) {
-		log.Printf("Creating database schema [...]")
-		for _, val := range processBar {
-			fmt.Printf("\r \a%s", val)
-			time.Sleep(50 * time.Millisecond)
-		}
-	
-		quanticDB, err := initializeQuanticDB(login, password, ip, dbname)
-		if err != nil {
-			log.Printf("Error %s when initializing 'quantic_db' DB\n", err)
+	if quanticDB == nil {
+		if quanticDB, err = initAndFill(login, password, ip, dbname); err != nil {
+			log.Printf("Error when initializing and filling the database: %s\n", err)
 			return
 		}
-		defer quanticDB.Close() // Close the connection to 'quantic_db'
-	
-		// Create the database schema
-		if err := createDatabaseSchema(quanticDB); err != nil {
-			log.Printf("Error %s when creating database schema\n", err)
-			return
-		}
-		log.Printf("Done")
-	
-		log.Printf("Filling Tables types [...]")
-		if err := createTypesTables(quanticDB); err != nil {
-			// log.Printf("Error %s when creating types tables\n", err)
-			return
-		}
-		log.Printf("Filling Tables [...]")
-	
-		// Import data into tables
-		if err := fillAllTables(quanticDB); err != nil {
-			log.Printf("Error %s when importing data into tables\n", err)
-			return
-		}
-		log.Printf("Done")
-	}
+		// log.Printf("Creating database schema [...]")
+		// for _, val := range processBar {
+		// 	fmt.Printf("\r \a%s", val)
+		// 	time.Sleep(50 * time.Millisecond)
+		// }
 
+		// quanticDB, err := initializeQuanticDB(login, password, ip, dbname)
+		// if err != nil {
+		// 	log.Printf("Error %s when initializing 'quantic_db' DB\n", err)
+		// 	return
+		// }
+		// defer quanticDB.Close() // Close the connection to 'quantic_db'
+
+		// // Create the database schema
+		// if err := createDatabaseSchema(quanticDB); err != nil {
+		// 	log.Printf("Error %s when creating database schema\n", err)
+		// 	return
+		// }
+		// log.Printf("Done")
+
+		// log.Printf("Filling Tables types [...]")
+		// if err := createTypesTables(quanticDB); err != nil {
+		// 	// log.Printf("Error %s when creating types tables\n", err)
+		// 	return
+		// }
+		// log.Printf("Filling Tables [...]")
+
+		// // Import data into tables
+		// if err := fillAllTables(quanticDB); err != nil {
+		// 	log.Printf("Error %s when importing data into tables\n", err)
+		// 	return
+		// }
+		// log.Printf("Done")
+	}
+	rows, err := quanticDB.Query("SELECT * FROM YourTable")
+    if err != nil {
+        log.Printf("Error when querying the database: %s\n", err)
+        return
+    }
+    defer rows.Close()
 
 }
