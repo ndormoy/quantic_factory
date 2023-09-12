@@ -3,10 +3,10 @@ Go, version : 1.21.1 darwin/amd64
 
 For .env we use : joho/godotenv v1.5.1
 
+TO create fake DATA : https://www.mockaroo.com
 
 
-We admit that the user is already in MySQL, so we create the user before creating the go program and we don t put this step in the process, its here just for information.
-
-CREATE USER 'new_user'@'localhost' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON * . * TO 'new_user'@'localhost';
-FLUSH PRIVILEGES;
+TO have access to the localfiles :
+mysql -u root -h 127.0.0.1 --protocol=tcp -p
+SHOW GLOBAL VARIABLES LIKE 'local_infile';
+SET GLOBAL local_infile = 'ON';

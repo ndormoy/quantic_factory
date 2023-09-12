@@ -2,7 +2,6 @@
 -- NOTE! If you have used non-SQL datatypes in your design, you will have to change these here.
 
 CREATE TABLE `ChannelType` (
-    -- UNSIGNED
     `ChannelTypeID` smallint UNSIGNED AUTO_INCREMENT NOT NULL ,
     `Name` varchar(30)  NOT NULL ,
     PRIMARY KEY (
@@ -11,7 +10,6 @@ CREATE TABLE `ChannelType` (
 );
 
 CREATE TABLE `EventType` (
-    -- UNSIGNED
     `EventTypeID` smallint UNSIGNED AUTO_INCREMENT NOT NULL ,
     `Name` varchar(30)  NOT NULL ,
     PRIMARY KEY (
@@ -20,9 +18,7 @@ CREATE TABLE `EventType` (
 );
 
 CREATE TABLE `Content` (
-    -- UNSIGNED
     `ContentID` int UNSIGNED AUTO_INCREMENT NOT NULL ,
-    -- UNSIGNED
     `ClientContentID` bigint UNSIGNED NOT NULL ,
     `InsertDate` timestamp  NOT NULL ,
     PRIMARY KEY (
@@ -31,9 +27,7 @@ CREATE TABLE `Content` (
 );
 
 CREATE TABLE `Customer` (
-    -- AUTOINCREMENT UNSIGNED
     `CustomerID` bigint UNSIGNED AUTO_INCREMENT NOT NULL ,
-    -- UNSIGNED
     `ClientCustomerID` bigint UNSIGNED NOT NULL ,
     `InsertDate` timestamp  NOT NULL ,
     PRIMARY KEY (
@@ -42,12 +36,9 @@ CREATE TABLE `Customer` (
 );
 
 CREATE TABLE `CustomerData` (
-    -- AUTOINCREMENT UNSIGNED
     `CustomerChannelID` bigint UNSIGNED AUTO_INCREMENT NOT NULL ,
-    -- UNSIGNED
     `CustomerID` bigint UNSIGNED NOT NULL ,
-    -- UNSIGNED
-    `ChannelTypeID` smallint  NOT NULL ,
+    `ChannelTypeID` smallint UNSIGNED NOT NULL ,
     `ChannelValue` varchar(600)  NOT NULL ,
     `InsertDate` timestamp  NOT NULL ,
     PRIMARY KEY (
@@ -56,9 +47,7 @@ CREATE TABLE `CustomerData` (
 );
 
 CREATE TABLE `CustomerEvent` (
-    -- AUTOINCREMENT UNSIGNED
     `EventID` bigint UNSIGNED AUTO_INCREMENT NOT NULL ,
-    -- UNSIGNED
     `ClientEventID` bigint  NOT NULL ,
     `InsertDate` timestamp  NOT NULL ,
     PRIMARY KEY (
@@ -67,18 +56,12 @@ CREATE TABLE `CustomerEvent` (
 );
 
 CREATE TABLE `CustomerEventData` (
-    -- AUTOINCREMENT UNSIGNED
     `EventDataId` bigint UNSIGNED AUTO_INCREMENT NOT NULL ,
-    -- UNSIGNED
     `EventID` bigint UNSIGNED NOT NULL ,
-    -- UNSIGNED
     `ContentID` int UNSIGNED NOT NULL ,
-    -- UNSIGNED
     `CustomerID` bigint UNSIGNED NOT NULL ,
-    -- UNSIGNED
     `EventTypeID` smallint UNSIGNED NOT NULL ,
     `EventDate` timestamp  NOT NULL ,
-    -- UNSIGNED
     `Quantity` smallint UNSIGNED NOT NULL ,
     `InsertDate` timestamp  NOT NULL ,
     PRIMARY KEY (
@@ -89,9 +72,7 @@ CREATE TABLE `CustomerEventData` (
 
 
 CREATE TABLE `ContentPrice` (
-    -- UNSIGNED
     `ContentPriceID` mediumint UNSIGNED AUTO_INCREMENT NOT NULL ,
-    -- UNSIGNED
     `ContentID` int UNSIGNED NOT NULL ,
     `Price` decimal(8,2) UNSIGNED NOT NULL ,
     `Currency` char(3)  NOT NULL ,
@@ -102,7 +83,6 @@ CREATE TABLE `ContentPrice` (
 );
 
 
-);
 
 ALTER TABLE `CustomerData` ADD CONSTRAINT `fk_CustomerData_CustomerID` FOREIGN KEY(`CustomerID`)
 REFERENCES `Customer` (`CustomerID`);

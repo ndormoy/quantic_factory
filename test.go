@@ -6,10 +6,13 @@ Permit to import MySQL
 */
 import (
 	"context"
+	// "encoding/csv"
 	"fmt"
 	"log"
 	"os"
+	// "strings"
 	"time"
+	// "bufio"
 
 	// Import godotenv
 	"database/sql"
@@ -35,10 +38,19 @@ func getDotEnvVar(key string) string {
 	return os.Getenv(key)
 }
 
+// func dsn(login string, password string, ip string, dbName string) string {
+// 	// return fmt.Sprintf("%s:%s@tcp(%s)/%s", login, password, ip, dbName)
+// 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true", login, password, ip, dbName)
+// }
+
+// func dsn(login string, password string, ip string, dbName string) string {
+// 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&", login, password, ip, dbName)
+// }
+
 func dsn(login string, password string, ip string, dbName string) string {
-	// return fmt.Sprintf("%s:%s@tcp(%s)/%s", login, password, ip, dbName)
-	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true", login, password, ip, dbName)
+    return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&allowAllFiles=true", login, password, ip, dbName)
 }
+
 
 /*
 Create the database 'quantic_db' if it doesn't exist and open the connection to it
@@ -156,6 +168,39 @@ func createDatabaseSchema(db *sql.DB) error {
 	return nil
 }
 
+/*
+This function insert "rows" in the given table "tableName"
+*/
+
+func insertRowsInDb(db *sql.DB, rows []string, tableName string) error {
+    for _, row := range rows {
+        query := fmt.Sprintf("INSERT INTO %s (Name) VALUES (?)", tableName)
+        _, err := db.Exec(query, row)
+        if err != nil {
+            return err
+        }
+    }
+
+    return nil
+}
+
+/*
+This function creates the tables ChannelType and EventType
+*/
+func createTypesTables(db *sql.DB) error {
+	channelTypes := []string{"Email", "PhoneNumber", "Postal", "MobileID", "Cookie"}
+	if err := insertRowsInDb(db, channelTypes, "ChannelType"); err != nil {
+		log.Printf("Error %s when inserting ChannelTypes\n", err)
+		return err
+	}
+	eventTypes := []string{"sent", "view", "click", "visit", "cart", "purchase"}
+	if err := insertRowsInDb(db, eventTypes, "EventType"); err != nil {
+		log.Printf("Error %s when inserting EventTypes\n", err)
+		return err
+	}
+	return nil
+}
+
 func main() {
 	fmt.Println("Hello, World!aaaa")
 	var login string = getDotEnvVar("LOGIN")
@@ -175,5 +220,24 @@ func main() {
 		log.Printf("Error %s when creating database schema\n", err)
 		return
 	}
+
+	// channelTypes := []string{"Email", "PhoneNumber", "Postal", "MobileID", "Cookie"}
+	// if err := insertRowsInDb(quanticDB, channelTypes, "ChannelType"); err != nil {
+	// 	log.Printf("Error %s when inserting ChannelTypes\n", err)
+	// 	return
+	// }
+	// eventTypes := []string{"sent", "view", "click", "visit", "cart", "purchase"}
+	// if err := insertRowsInDb(quanticDB, eventTypes, "EventType"); err != nil {
+	// 	log.Printf("Error %s when inserting EventTypes\n", err)
+	// 	return
+	// }
+
+	if err := createTypesTables(quanticDB); err !=  nil {
+		log.Printf("Error %s when creating types tables\n", err)
+		return
+	}
+
+
+    fmt.Println("Data successfully inserted into the EventType table.")
 
 }
