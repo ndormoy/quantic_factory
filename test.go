@@ -21,10 +21,53 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
-	"github.com/schollz/progressbar/v3"
+	// "github.com/schollz/progressbar/v3"
 )
 
 type Customer struct {
+}
+
+var processBar = []string{
+	"00%: [                                          ]",
+	"05%: [##                                        ]",
+	"10%: [####                                      ]",
+	"15%: [######                                    ]",
+	"20%: [########                                  ]",
+	"25%: [##########                                ]",
+	"30%: [############                              ]",
+	"35%: [##############                            ]",
+	"40%: [################                          ]",
+	"45%: [##################                        ]",
+	"50%: [####################                      ]",
+	"55%: [######################                    ]",
+	"60%: [########################                  ]",
+	"65%: [##########################                ]",
+	"70%: [############################              ]",
+	"75%: [##############################            ]",
+	"80%: [################################          ]",
+	"85%: [##################################        ]",
+	"90%: [####################################      ]",
+	"95%: [######################################    ]",
+	"100%:[##########################################]\n",
+}
+
+var processBar2 = []string{
+	"00%: [                                          ]",
+	"10%: [####                                      ]",
+	"30%: [############                              ]",
+	"40%: [################                          ]",
+	"60%: [########################                  ]",
+	"70%: [############################              ]",
+	"90%: [####################################      ]",
+	"100%:[##########################################]\n",
+}
+
+func printCustomProgressBar(progress int) {
+	if progress < 0 || progress > 100 {
+		return
+	}
+	index := progress / 10
+	fmt.Printf("\r%s", processBar2[index])
 }
 
 /*
@@ -256,7 +299,7 @@ func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []stri
 This function fills all the tables with the data from the CSV files
 */
 
-func fillAllTables(db *sql.DB, progressBar *progressbar.ProgressBar) error {
+func fillAllTables(db *sql.DB) error {
 	//Creates columnNames for each table in the schema
 	columnNamesCustomer := []string{"CustomerID", "ClientCustomerID", "InsertDate"}
 	columnNamesCustomerData := []string{"CustomerChannelID", "CustomerID", "ChannelTypeID", "ChannelValue", "InsertDate"}
@@ -278,37 +321,23 @@ func fillAllTables(db *sql.DB, progressBar *progressbar.ProgressBar) error {
 		{"csv/CustomerEventData.csv", "CustomerEventData", columNamesCustomerEventData},
 	}
 
-	for _, step := range steps {
+	for i, step := range steps {
 		if err := importDataFromCSV(db, step.csvPath, step.tableName, step.columnNames); err != nil {
 			log.Printf("Error %s when importing data from CSV %s\n", err, step.tableName)
 			return err
 		}
-		// Update and render the main progress bar
-		progressBar.Add(1)
+		// Calculate and print the progress
+		progress := (i + 1) * 70 / len(steps) // Assuming 'i' is the loop variable
+		printCustomProgressBar(progress)
+
+		// Sleep for a short time to show the progress
+		time.Sleep(50 * time.Millisecond)
 	}
-	progressBar.Clear()
-	progressBar.Finish()
 
 	return nil
 }
 
-func initializeProgressBar(message string) *progressbar.ProgressBar {
-	Bar := progressbar.NewOptions(1000,
-		progressbar.OptionEnableColorCodes(true),
-		progressbar.OptionShowBytes(true),
-		progressbar.OptionSetWidth(15),
-		progressbar.OptionSetDescription(message),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "[green]=[reset]",
-			SaucerHead:    "[green]>[reset]",
-			SaucerPadding: " ",
-			BarStart:      "[",
-			BarEnd:        "]",
-		}))
-	Bar.RenderBlank()
-	time.Sleep(600 * time.Millisecond)
-	return Bar
-}
+
 
 func main() {
 	var login string = getDotEnvVar("LOGIN")
@@ -316,8 +345,11 @@ func main() {
 	var ip string = getDotEnvVar("IP")
 	var dbname string = "quantic_db"
 
-	dbCreationBar := initializeProgressBar("Creating database [...]")
-	dbCreationBar.RenderBlank()
+	log.Printf("Creating database schema [...]")
+	for _, val := range processBar {
+		fmt.Printf("\r \a%s", val)
+		time.Sleep(50 * time.Millisecond)
+	}
 
 	quanticDB, err := initializeQuanticDB(login, password, ip, dbname)
 	if err != nil {
@@ -331,23 +363,20 @@ func main() {
 		log.Printf("Error %s when creating database schema\n", err)
 		return
 	}
+	log.Printf("Done")
 
-	// Finish the database creation progress bar
-	dbCreationBar.Clear()
-	dbCreationBar.Finish()
-
-	dataPopulationBar := initializeProgressBar("Filling Data with .csv files [...]")
-	dataPopulationBar.RenderBlank()
-
+	log.Printf("Filling Tables [...]")
 	if err := createTypesTables(quanticDB); err != nil {
 		// log.Printf("Error %s when creating types tables\n", err)
 		return
 	}
 
 	// Import data into tables
-	if err := fillAllTables(quanticDB, dataPopulationBar); err != nil {
+	if err := fillAllTables(quanticDB); err != nil {
 		log.Printf("Error %s when importing data into tables\n", err)
 		return
 	}
+	log.Printf("Done")
+
 
 }
