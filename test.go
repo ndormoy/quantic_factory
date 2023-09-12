@@ -6,10 +6,11 @@ Permit to import MySQL
 */
 import (
 	"context"
-	// "encoding/csv"
+	"encoding/csv"
 	"fmt"
 	"log"
 	"os"
+
 	// "strings"
 	"time"
 	// "bufio"
@@ -48,9 +49,8 @@ func getDotEnvVar(key string) string {
 // }
 
 func dsn(login string, password string, ip string, dbName string) string {
-    return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&allowAllFiles=true", login, password, ip, dbName)
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&allowAllFiles=true", login, password, ip, dbName)
 }
-
 
 /*
 Create the database 'quantic_db' if it doesn't exist and open the connection to it
@@ -173,15 +173,15 @@ This function insert "rows" in the given table "tableName"
 */
 
 func insertRowsInDb(db *sql.DB, rows []string, tableName string) error {
-    for _, row := range rows {
-        query := fmt.Sprintf("INSERT INTO %s (Name) VALUES (?)", tableName)
-        _, err := db.Exec(query, row)
-        if err != nil {
-            return err
-        }
-    }
+	for _, row := range rows {
+		query := fmt.Sprintf("INSERT INTO %s (Name) VALUES (?)", tableName)
+		_, err := db.Exec(query, row)
+		if err != nil {
+			return err
+		}
+	}
 
-    return nil
+	return nil
 }
 
 /*
@@ -200,6 +200,134 @@ func createTypesTables(db *sql.DB) error {
 	}
 	return nil
 }
+
+// func importCustomerDataFromCSV(db *sql.DB, csvPath string) error {
+//     // Open the CSV file
+//     file, err := os.Open(csvPath)
+//     if err != nil {
+//         return err
+//     }
+//     defer file.Close()
+
+//     // Create a new CSV reader
+//     reader := csv.NewReader(file)
+
+//     // Read CSV records
+//     records, err := reader.ReadAll()
+//     if err != nil {
+//         return err
+//     }
+
+//     // Prepare the SQL statement for insertion
+//     stmt, err := db.Prepare("INSERT INTO Customer (ClientCustomerID, InsertDate) VALUES (?, ?)")
+//     if err != nil {
+//         return err
+//     }
+//     defer stmt.Close()
+
+//     // Skip the first row (header)
+//     for i, record := range records {
+//         if i == 0 { // Skip the first row
+//             continue
+//         }
+
+//         // Assuming the CSV format is: CustomerID,ClientCustomerID,InsertDate
+//         clientCustomerID := record[1] // Use index 1 for ClientCustomerID
+//         insertDate := record[2]       // Use index 2 for InsertDate
+
+//         _, err := stmt.Exec(clientCustomerID, insertDate)
+//         if err != nil {
+//             return err
+//         }
+//     }
+
+//     return nil
+// }
+
+// Function to import data from a CSV file and insert it into a specified table
+func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []string) error {
+    // Open the CSV file
+    file, err := os.Open(csvPath)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
+
+    // Create a new CSV reader
+    reader := csv.NewReader(file)
+
+    // Read CSV records
+    records, err := reader.ReadAll()
+    if err != nil {
+        return err
+    }
+
+/*------------*/
+
+	//Prepare the SQL statement for insertion
+	// query := fmt.Sprintf("INSERT INTO %s (Name) VALUES (?)", tableName)
+	query := fmt.Sprintf("INSERT INTO Customer (ClientCustomerID, InsertDate) VALUES (?, ?)")
+
+    // stmt, err := db.Prepare("INSERT INTO Customer (ClientCustomerID, InsertDate) VALUES (?, ?)")
+    stmt, err := db.Prepare(query)
+    if err != nil {
+        return err
+    }
+    defer stmt.Close()
+
+    // Skip the first row (header)
+    for i, record := range records {
+        if i == 0 { // Skip the first row
+            continue
+        }
+
+        // Assuming the CSV format is: CustomerID,ClientCustomerID,InsertDate
+        clientCustomerID := record[1] // Use index 1 for ClientCustomerID
+        insertDate := record[2]       // Use index 2 for InsertDate
+
+        _, err := stmt.Exec(clientCustomerID, insertDate)
+        if err != nil {
+            return err
+        }
+    }
+
+    return nil
+
+/*------------*/
+    // // Prepare the SQL statement for insertion
+    // placeholders := make([]string, len(columnNames))
+    // for range columnNames {
+    //     placeholders = append(placeholders, "?")
+    // }
+    // query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", tableName, strings.Join(columnNames, ", "), strings.Join(placeholders, ", "))
+    // stmt, err := db.Prepare(query)
+    // if err != nil {
+    //     return err
+    // }
+    // defer stmt.Close()
+
+    // // Skip the first row (header)
+    // for i, record := range records {
+    //     if i == 0 { // Skip the first row
+    //         continue
+    //     }
+
+    //     // Assuming the CSV format corresponds to the provided column names
+    //     var values []interface{}
+    //     for _, colValue := range record {
+    //         values = append(values, colValue)
+    //     }
+
+    //     _, err := stmt.Exec(values...)
+    //     if err != nil {
+    //         return err
+    //     }
+    // }
+
+    // return nil
+}
+
+
 
 func main() {
 	fmt.Println("Hello, World!aaaa")
@@ -221,23 +349,23 @@ func main() {
 		return
 	}
 
-	// channelTypes := []string{"Email", "PhoneNumber", "Postal", "MobileID", "Cookie"}
-	// if err := insertRowsInDb(quanticDB, channelTypes, "ChannelType"); err != nil {
-	// 	log.Printf("Error %s when inserting ChannelTypes\n", err)
-	// 	return
-	// }
-	// eventTypes := []string{"sent", "view", "click", "visit", "cart", "purchase"}
-	// if err := insertRowsInDb(quanticDB, eventTypes, "EventType"); err != nil {
-	// 	log.Printf("Error %s when inserting EventTypes\n", err)
-	// 	return
-	// }
-
-	if err := createTypesTables(quanticDB); err !=  nil {
-		log.Printf("Error %s when creating types tables\n", err)
+	if err := createTypesTables(quanticDB); err != nil {
+		// log.Printf("Error %s when creating types tables\n", err)
 		return
 	}
 
+	// csvPath := "csv/Customer.csv"
+	// if err := importCustomerDataFromCSV(quanticDB, csvPath); err != nil {
+	// 	log.Printf("Error %s when importing data from CSV\n", err)
+	// 	return
+	// }
+	csvPath := "csv/Customer.csv"
+	tableName := "Customer"
+	columnNames := []string{"ClientCustomerID", "InsertDate"}
 
-    fmt.Println("Data successfully inserted into the EventType table.")
+	if err := importDataFromCSV(quanticDB, csvPath, tableName, columnNames); err != nil {
+		log.Printf("Error %s when importing data from CSV\n", err)
+		return
+	}
 
 }
