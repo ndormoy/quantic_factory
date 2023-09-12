@@ -40,15 +40,6 @@ func getDotEnvVar(key string) string {
 	return os.Getenv(key)
 }
 
-// func dsn(login string, password string, ip string, dbName string) string {
-// 	// return fmt.Sprintf("%s:%s@tcp(%s)/%s", login, password, ip, dbName)
-// 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true", login, password, ip, dbName)
-// }
-
-// func dsn(login string, password string, ip string, dbName string) string {
-// 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&", login, password, ip, dbName)
-// }
-
 func dsn(login string, password string, ip string, dbName string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&allowAllFiles=true", login, password, ip, dbName)
 }
@@ -260,6 +251,40 @@ func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []stri
 	return nil
 }
 
+/*
+This function fills all the tables with the data from the CSV files
+*/
+
+func fillAllTables(db *sql.DB) error {
+	columnNamesCustomer := []string{"CustomerID", "ClientCustomerID", "InsertDate"}
+	columnNamesCustomerData := []string{"CustomerChannelID", "CustomerID", "ChannelTypeID", "ChannelValue", "InsertDate"}
+	columnNamesCustomerEvent := []string{"EventID", "ClientEventID", "InsertDate"}
+	columnNamesContent := []string{"ContentID", "ClientContentID", "InsertDate"}
+	columnNamesContentPrice := []string{"ContentPriceID", "ContentID", "Price", "Currency", "InsertDate"}
+	columNamesCustomerEventData := []string{"EventDataID", "EventID", "ContentID", "CustomerID", "EventTypeID", "EventDate", "Quantity", "InsertDate"}
+
+	if err := importDataFromCSV(db, "csv/Customer.csv", "Customer", columnNamesCustomer); err != nil {
+		log.Printf("Error %s when importing data from CSV Customer\n", err)
+		return err
+	} else if err := importDataFromCSV(db, "csv/CustomerData.csv", "CustomerData", columnNamesCustomerData); err != nil {
+		log.Printf("Error %s when importing data from CSV CustomerData\n", err)
+		return err
+	} else if err := importDataFromCSV(db, "csv/CustomerEvent.csv", "CustomerEvent", columnNamesCustomerEvent); err != nil {
+		log.Printf("Error %s when importing data from CSV CustomerEvent\n", err)
+		return err
+	} else if err := importDataFromCSV(db, "csv/Content.csv", "Content", columnNamesContent); err != nil {
+		log.Printf("Error %s when importing data from CSV Content\n", err)
+		return err
+	} else if err := importDataFromCSV(db, "csv/ContentPrice.csv", "ContentPrice", columnNamesContentPrice); err != nil {
+		log.Printf("Error %s when importing data from CSV ContentPrice\n", err)
+		return err
+	} else if err := importDataFromCSV(db, "csv/CustomerEventData.csv", "CustomerEventData", columNamesCustomerEventData); err != nil {
+		log.Printf("Error %s when importing data from CSV CustomerEventData\n", err)
+		return err
+	}
+	return nil
+}
+
 func main() {
 	fmt.Println("Hello, World!aaaa")
 	var login string = getDotEnvVar("LOGIN")
@@ -285,13 +310,6 @@ func main() {
 		return
 	}
 
-	csvPath := "csv/Customer.csv"
-	tableName := "Customer"
-	columnNames := []string{"CustomerID", "ClientCustomerID", "InsertDate"}
-
-	if err := importDataFromCSV(quanticDB, csvPath, tableName, columnNames); err != nil {
-		log.Printf("Error %s when importing data from CSV\n", err)
-		return
-	}
+	fillAllTables(quanticDB)
 
 }
