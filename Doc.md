@@ -10,3 +10,6 @@ TO have access to the localfiles :
 mysql -u root -h 127.0.0.1 --protocol=tcp -p
 SHOW GLOBAL VARIABLES LIKE 'local_infile';
 SET GLOBAL local_infile = 'ON';
+
+ProgressBar :
+https://github.com/schollz/progressbar

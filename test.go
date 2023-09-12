@@ -21,6 +21,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"github.com/schollz/progressbar/v3"
 )
 
 type Customer struct {
@@ -255,43 +256,134 @@ func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []stri
 This function fills all the tables with the data from the CSV files
 */
 
-func fillAllTables(db *sql.DB) error {
+// func fillAllTables(db *sql.DB, progressBar *progressbar.ProgressBar) error {
+// 	columnNamesCustomer := []string{"CustomerID", "ClientCustomerID", "InsertDate"}
+// 	columnNamesCustomerData := []string{"CustomerChannelID", "CustomerID", "ChannelTypeID", "ChannelValue", "InsertDate"}
+// 	columnNamesCustomerEvent := []string{"EventID", "ClientEventID", "InsertDate"}
+// 	columnNamesContent := []string{"ContentID", "ClientContentID", "InsertDate"}
+// 	columnNamesContentPrice := []string{"ContentPriceID", "ContentID", "Price", "Currency", "InsertDate"}
+// 	columNamesCustomerEventData := []string{"EventDataID", "EventID", "ContentID", "CustomerID", "EventTypeID", "EventDate", "Quantity", "InsertDate"}
+
+// 	// totalSteps := 5 // Number of steps you want to track
+
+//     // // Create a new bar with the total steps
+//     // progressBar = progressbar.NewOptions(totalSteps,
+//     //     progressbar.OptionSetDescription("Data Population"),
+//     //     progressbar.OptionSetWidth(15),
+//     //     progressbar.OptionSetRenderBlankState(true),
+//     //     progressbar.OptionSetTheme(progressbar.Theme{
+// 	// 		Saucer:        "[green]=[reset]",
+// 	// 		SaucerHead:    "[green]>[reset]",
+// 	// 		SaucerPadding: " ",
+// 	// 		BarStart:      "[",
+// 	// 		BarEnd:        "]",
+// 	// 	}),
+//     // )
+// 	bar := progressbar.NewOptions(1000,
+// 		progressbar.OptionEnableColorCodes(true),
+// 		progressbar.OptionShowBytes(true),
+// 		progressbar.OptionSetWidth(15),
+// 		progressbar.OptionSetDescription("[cyan][1/3][reset] Writing moshable file..."),
+// 		progressbar.OptionSetTheme(progressbar.Theme{
+// 			Saucer:        "[green]=[reset]",
+// 			SaucerHead:    "[green]>[reset]",
+// 			SaucerPadding: " ",
+// 			BarStart:      "[",
+// 			BarEnd:        "]",
+// 		}))
+// 	for i := 0; i < 1000; i++ {
+// 		bar.Add(1)
+// 		time.Sleep(5 * time.Millisecond)
+// 	}
+
+// 	if err := importDataFromCSV(db, "csv/Customer.csv", "Customer", columnNamesCustomer); err != nil {
+// 		log.Printf("Error %s when importing data from CSV Customer\n", err)
+// 		return err
+// 	} else if err := importDataFromCSV(db, "csv/CustomerData.csv", "CustomerData", columnNamesCustomerData); err != nil {
+// 		log.Printf("Error %s when importing data from CSV CustomerData\n", err)
+// 		return err
+// 	} else if err := importDataFromCSV(db, "csv/CustomerEvent.csv", "CustomerEvent", columnNamesCustomerEvent); err != nil {
+// 		log.Printf("Error %s when importing data from CSV CustomerEvent\n", err)
+// 		return err
+// 	} else if err := importDataFromCSV(db, "csv/Content.csv", "Content", columnNamesContent); err != nil {
+// 		log.Printf("Error %s when importing data from CSV Content\n", err)
+// 		return err
+// 	} else if err := importDataFromCSV(db, "csv/ContentPrice.csv", "ContentPrice", columnNamesContentPrice); err != nil {
+// 		log.Printf("Error %s when importing data from CSV ContentPrice\n", err)
+// 		return err
+// 	} else if err := importDataFromCSV(db, "csv/CustomerEventData.csv", "CustomerEventData", columNamesCustomerEventData); err != nil {
+// 		log.Printf("Error %s when importing data from CSV CustomerEventData\n", err)
+// 		return err
+// 	}
+// 	return nil
+// }
+
+func fillAllTables(db *sql.DB, progressBar *progressbar.ProgressBar) error {
+	//Creates columnNames for each table in the schema
 	columnNamesCustomer := []string{"CustomerID", "ClientCustomerID", "InsertDate"}
 	columnNamesCustomerData := []string{"CustomerChannelID", "CustomerID", "ChannelTypeID", "ChannelValue", "InsertDate"}
 	columnNamesCustomerEvent := []string{"EventID", "ClientEventID", "InsertDate"}
 	columnNamesContent := []string{"ContentID", "ClientContentID", "InsertDate"}
 	columnNamesContentPrice := []string{"ContentPriceID", "ContentID", "Price", "Currency", "InsertDate"}
 	columNamesCustomerEventData := []string{"EventDataID", "EventID", "ContentID", "CustomerID", "EventTypeID", "EventDate", "Quantity", "InsertDate"}
+	// Create an array of progress bars for each step
+	stepProgressBars := []*progressbar.ProgressBar{
+		progressbar.Default(100),
+		progressbar.Default(100),
+		progressbar.Default(100),
+		progressbar.Default(100),
+		progressbar.Default(100),
+		progressbar.Default(100),
+	}
 
-	if err := importDataFromCSV(db, "csv/Customer.csv", "Customer", columnNamesCustomer); err != nil {
-		log.Printf("Error %s when importing data from CSV Customer\n", err)
-		return err
-	} else if err := importDataFromCSV(db, "csv/CustomerData.csv", "CustomerData", columnNamesCustomerData); err != nil {
-		log.Printf("Error %s when importing data from CSV CustomerData\n", err)
-		return err
-	} else if err := importDataFromCSV(db, "csv/CustomerEvent.csv", "CustomerEvent", columnNamesCustomerEvent); err != nil {
-		log.Printf("Error %s when importing data from CSV CustomerEvent\n", err)
-		return err
-	} else if err := importDataFromCSV(db, "csv/Content.csv", "Content", columnNamesContent); err != nil {
-		log.Printf("Error %s when importing data from CSV Content\n", err)
-		return err
-	} else if err := importDataFromCSV(db, "csv/ContentPrice.csv", "ContentPrice", columnNamesContentPrice); err != nil {
-		log.Printf("Error %s when importing data from CSV ContentPrice\n", err)
-		return err
-	} else if err := importDataFromCSV(db, "csv/CustomerEventData.csv", "CustomerEventData", columNamesCustomerEventData); err != nil {
-		log.Printf("Error %s when importing data from CSV CustomerEventData\n", err)
-		return err
+	steps := []struct {
+		csvPath     string
+		tableName   string
+		columnNames []string
+	}{
+		{"csv/Customer.csv", "Customer", columnNamesCustomer},
+		{"csv/CustomerData.csv", "CustomerData", columnNamesCustomerData},
+		{"csv/CustomerEvent.csv", "CustomerEvent", columnNamesCustomerEvent},
+		{"csv/Content.csv", "Content", columnNamesContent},
+		{"csv/ContentPrice.csv", "ContentPrice", columnNamesContentPrice},
+		{"csv/CustomerEventData.csv", "CustomerEventData", columNamesCustomerEventData},
+	}
+
+	for i, step := range steps {
+		if err := importDataFromCSV(db, step.csvPath, step.tableName, step.columnNames); err != nil {
+			log.Printf("Error %s when importing data from CSV %s\n", err, step.tableName)
+			return err
+		}
+		stepProgressBars[i].Finish() // Finish the progress bar for the current step
 	}
 	return nil
 }
 
+func initializeProgressBar(message string) *progressbar.ProgressBar {
+	dbCreationBar := progressbar.NewOptions(1000,
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionShowBytes(true),
+		progressbar.OptionSetWidth(15),
+		progressbar.OptionSetDescription(message),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]=[reset]",
+			SaucerHead:    "[green]>[reset]",
+			SaucerPadding: " ",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}))
+		dbCreationBar.RenderBlank()
+	time.Sleep(600 * time.Millisecond)
+	return dbCreationBar
+}
+
 func main() {
-	fmt.Println("Hello, World!aaaa")
 	var login string = getDotEnvVar("LOGIN")
 	var password string = getDotEnvVar("PASSWORD")
 	var ip string = getDotEnvVar("IP")
 	var dbname string = "quantic_db"
 
+	dbCreationBar := initializeProgressBar("Creating database [...]")
 	quanticDB, err := initializeQuanticDB(login, password, ip, dbname)
 	if err != nil {
 		log.Printf("Error %s when initializing 'quantic_db' DB\n", err)
@@ -305,11 +397,25 @@ func main() {
 		return
 	}
 
+	// Finish the database creation progress bar
+	dbCreationBar.Finish()
+
+	// Create a progress bar for data population
+	dataPopulationBar := progressbar.Default(100)
+	dataPopulationBar.RenderBlank()
+
 	if err := createTypesTables(quanticDB); err != nil {
 		// log.Printf("Error %s when creating types tables\n", err)
 		return
 	}
 
-	fillAllTables(quanticDB)
+	// Import data into tables
+	if err := fillAllTables(quanticDB, dataPopulationBar); err != nil {
+		log.Printf("Error %s when importing data into tables\n", err)
+		return
+	}
+
+	// Finish the data population progress bar
+	dataPopulationBar.Finish()
 
 }
