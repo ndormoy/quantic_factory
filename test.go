@@ -11,7 +11,7 @@ import (
 	"log"
 	"os"
 
-	// "strings"
+	"strings"
 	"time"
 	// "bufio"
 
@@ -201,47 +201,48 @@ func createTypesTables(db *sql.DB) error {
 	return nil
 }
 
-// func importCustomerDataFromCSV(db *sql.DB, csvPath string) error {
-//     // Open the CSV file
-//     file, err := os.Open(csvPath)
-//     if err != nil {
-//         return err
-//     }
-//     defer file.Close()
+// // Function to import data from a CSV file and insert it into a specified table
+// func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []string) error {
+// 	// Open the CSV file
+// 	file, err := os.Open(csvPath)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer file.Close()
 
-//     // Create a new CSV reader
-//     reader := csv.NewReader(file)
+// 	// Create a new CSV reader
+// 	reader := csv.NewReader(file)
 
-//     // Read CSV records
-//     records, err := reader.ReadAll()
-//     if err != nil {
-//         return err
-//     }
+// 	// Read CSV records
+// 	records, err := reader.ReadAll()
+// 	if err != nil {
+// 		return err
+// 	}
 
-//     // Prepare the SQL statement for insertion
-//     stmt, err := db.Prepare("INSERT INTO Customer (ClientCustomerID, InsertDate) VALUES (?, ?)")
-//     if err != nil {
-//         return err
-//     }
-//     defer stmt.Close()
+// 	//Prepare the SQL statement for insertion
+// 	query := fmt.Sprintf("INSERT INTO Customer (ClientCustomerID, InsertDate) VALUES (?, ?)")
+// 	stmt, err := db.Prepare(query)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer stmt.Close()
 
-//     // Skip the first row (header)
-//     for i, record := range records {
-//         if i == 0 { // Skip the first row
-//             continue
-//         }
+// 	// Skip the first row (header)
+// 	for i, record := range records {
+// 		if i == 0 { // Skip the first row
+// 			continue
+// 		}
+// 		// Assuming the CSV format is: CustomerID,ClientCustomerID,InsertDate
+// 		clientCustomerID := record[1] // Use index 1 for ClientCustomerID
+// 		insertDate := record[2]       // Use index 2 for InsertDate
 
-//         // Assuming the CSV format is: CustomerID,ClientCustomerID,InsertDate
-//         clientCustomerID := record[1] // Use index 1 for ClientCustomerID
-//         insertDate := record[2]       // Use index 2 for InsertDate
+// 		_, err := stmt.Exec(clientCustomerID, insertDate)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
 
-//         _, err := stmt.Exec(clientCustomerID, insertDate)
-//         if err != nil {
-//             return err
-//         }
-//     }
-
-//     return nil
+// 	return nil
 // }
 
 // Function to import data from a CSV file and insert it into a specified table
@@ -262,13 +263,14 @@ func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []stri
         return err
     }
 
-/*------------*/
+    // Prepare the SQL statement for insertion
+    numColumns := len(columnNames)
+    placeholders := make([]string, numColumns)
+    for i := 0; i < numColumns; i++ {
+        placeholders[i] = "?"
+    }
 
-	//Prepare the SQL statement for insertion
-	// query := fmt.Sprintf("INSERT INTO %s (Name) VALUES (?)", tableName)
-	query := fmt.Sprintf("INSERT INTO Customer (ClientCustomerID, InsertDate) VALUES (?, ?)")
-
-    // stmt, err := db.Prepare("INSERT INTO Customer (ClientCustomerID, InsertDate) VALUES (?, ?)")
+    query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", tableName, strings.Join(columnNames, ", "), strings.Join(placeholders, ", "))
     stmt, err := db.Prepare(query)
     if err != nil {
         return err
@@ -281,53 +283,25 @@ func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []stri
             continue
         }
 
-        // Assuming the CSV format is: CustomerID,ClientCustomerID,InsertDate
-        clientCustomerID := record[1] // Use index 1 for ClientCustomerID
-        insertDate := record[2]       // Use index 2 for InsertDate
+        // Check if the number of columns in the record matches the expected number
+        if len(record) != numColumns {
+            return fmt.Errorf("record at row %d has an incorrect number of columns", i+1)
+        }
 
-        _, err := stmt.Exec(clientCustomerID, insertDate)
+        // Convert the record values to interface{} for Exec
+        var values []interface{}
+        for _, colValue := range record {
+            values = append(values, colValue)
+        }
+
+        _, err := stmt.Exec(values...)
         if err != nil {
             return err
         }
     }
 
     return nil
-
-/*------------*/
-    // // Prepare the SQL statement for insertion
-    // placeholders := make([]string, len(columnNames))
-    // for range columnNames {
-    //     placeholders = append(placeholders, "?")
-    // }
-    // query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", tableName, strings.Join(columnNames, ", "), strings.Join(placeholders, ", "))
-    // stmt, err := db.Prepare(query)
-    // if err != nil {
-    //     return err
-    // }
-    // defer stmt.Close()
-
-    // // Skip the first row (header)
-    // for i, record := range records {
-    //     if i == 0 { // Skip the first row
-    //         continue
-    //     }
-
-    //     // Assuming the CSV format corresponds to the provided column names
-    //     var values []interface{}
-    //     for _, colValue := range record {
-    //         values = append(values, colValue)
-    //     }
-
-    //     _, err := stmt.Exec(values...)
-    //     if err != nil {
-    //         return err
-    //     }
-    // }
-
-    // return nil
 }
-
-
 
 func main() {
 	fmt.Println("Hello, World!aaaa")
@@ -361,11 +335,12 @@ func main() {
 	// }
 	csvPath := "csv/Customer.csv"
 	tableName := "Customer"
-	columnNames := []string{"ClientCustomerID", "InsertDate"}
+	columnNames := []string{"CustomerID", "ClientCustomerID", "InsertDate"}
 
 	if err := importDataFromCSV(quanticDB, csvPath, tableName, columnNames); err != nil {
 		log.Printf("Error %s when importing data from CSV\n", err)
 		return
 	}
+
 
 }
