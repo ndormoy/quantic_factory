@@ -7,14 +7,16 @@ Permit to import MySQL
 import (
 	// "context"
 	// "encoding/csv"
-	// "fmt"
+	"fmt"
 	"log"
+
 	// "os"
 	// "strings"
 	"time"
 	// "bufio"
 	// Import godotenv
 	"database/sql"
+
 	_ "github.com/go-sql-driver/mysql"
 	// "github.com/joho/godotenv"
 	// "github.com/schollz/progressbar/v3"
@@ -22,9 +24,9 @@ import (
 
 // Create a struct to represent Customer data
 type Customer struct {
-	CustomerID int64
+	CustomerID       int64
 	ClientCustomerID int64
-	InsertDate time.Time
+	InsertDate       time.Time
 }
 
 func main() {
@@ -47,49 +49,23 @@ func main() {
 		}
 	}
 
-	mapWithCustIDPurchaseJOIN(quanticDB)
+	// mapWithCustIDPurchaseJOIN(quanticDB)
 
-
-
-	// // Query to retrieve CustomerEventData records with EventTypeID = 6 and ContentID
-	// query := `
-	// 	SELECT c.CustomerID, ce.ContentID
-	// 	FROM CustomerEventData ce
-	// 	INNER JOIN Customer c ON ce.CustomerID = c.CustomerID
-	// 	WHERE ce.EventTypeID = 6
-	// `
-
-	// rows, err := quanticDB.Query(query)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer rows.Close()
-
-	// // Create a map to store CustomerID and total Price
-	// customerPriceMap := make(map[int64]float64)
-
-	// // Iterate through the rows to get ContentID and Price
-	// for rows.Next() {
-	// 	var customerID, contentID int64
-	// 	err := rows.Scan(&customerID, &contentID)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-
-	// 	// Query to retrieve Price from ContentPrice
-	// 	priceQuery := "SELECT Price FROM ContentPrice WHERE ContentID = ?"
-	// 	var price float64
-	// 	err = quanticDB.QueryRow(priceQuery, contentID).Scan(&price)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-
-	// 	// Add the Price to the customer's total Price
-	// 	customerPriceMap[customerID] += price
-	// }
-
-	// // Print the map with CustomerID and total Price
-	// for customerID, totalPrice := range customerPriceMap {
-	// 	fmt.Printf("CustomerID: %d, Total Price: %.2f\n", customerID, totalPrice)
-	// }
+	contentIDs, err := getContentIDFromPurchase(quanticDB)
+	if err != nil {
+		log.Printf("Error getting ContentID in CustomerEventData where EventTypeID == 6 in function getContentIDFromPurchase : %s\n", err)
+		return
+	}
+	// customerIDs, err := createMapWithCustomerIDPurchase(quanticDB, contentIDs)
+	// customerIDs, err := createMapWithCustomerIDPurchase(quanticDB, contentIDs)
+	customerIDs, err :=  calculateTotalPurchaseAmounts(quanticDB, contentIDs)
+	if err != nil {
+		log.Printf("Error when creating and return a map with CustomerID and their purchases, in function createMapWithCustomerIDPurchase : %s\n", err)
+		return
+	}
+	// fmt.Printf("customerIDs : %v\n", customerIDs)
+	// Print the map with CustomerID and total Purchase Amount
+    for customerID, purchaseAmount := range customerIDs {
+        fmt.Printf("CustomerID: %d, Total Purchase Amount: %.2f\n", customerID, purchaseAmount)
+    }
 }
