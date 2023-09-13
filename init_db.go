@@ -11,7 +11,9 @@ import (
 	"time"
 )
 
-/*Check if database already exists, if the db exists, return the instance of this Db */
+/*
+	Check if database already exists, if the db exists, return the instance of this Db
+*/
 
 func isQuanticDBExists(login, password, ip, dbname string) (*sql.DB, error) {
 	log.Printf("Checking if database exists...")
@@ -44,15 +46,15 @@ func isQuanticDBExists(login, password, ip, dbname string) (*sql.DB, error) {
 }
 
 /*
-return the good formated string to connect to the database
+	return the good formated string to connect to the database
 */
 func dsn(login string, password string, ip string, dbName string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&allowAllFiles=true", login, password, ip, dbName)
 }
 
 /*
-This function will create the DB, and fill the schema with csv.
-Will file the TypeTable, and the other table.
+	This function will create the DB, and fill the schema with csv.
+	Will file the TypeTable, and the other table.
 */
 func initAndFill(login string, password string, ip string, dbname string) (*sql.DB, error) {
 	log.Printf("Creating database schema [...]")
@@ -92,7 +94,7 @@ func initAndFill(login string, password string, ip string, dbname string) (*sql.
 }
 
 /*
-Create the database 'quantic_db' if it doesn't exist and open the connection to it
+	Create the database 'quantic_db' if it doesn't exist and open the connection to it
 */
 func initializeQuanticDB(login, password, ip, dbname string) (*sql.DB, error) {
 	// Open the connection to 'mysql' database and create 'quantic_db'
@@ -121,7 +123,7 @@ func initializeQuanticDB(login, password, ip, dbname string) (*sql.DB, error) {
 }
 
 /*
-Create the database schema for the given Database
+	Create the database schema for the given Database
 */
 func createDatabaseSchema(db *sql.DB) error {
 	// SQL script with table creation and constraints
@@ -208,7 +210,7 @@ func createDatabaseSchema(db *sql.DB) error {
 }
 
 /*
-This function creates the tables ChannelType and EventType
+	This function creates the tables ChannelType and EventType
 */
 func createTypesTables(db *sql.DB) error {
 	channelTypes := []string{"Email", "PhoneNumber", "Postal", "MobileID", "Cookie"}
@@ -225,7 +227,7 @@ func createTypesTables(db *sql.DB) error {
 }
 
 /*
-This function insert "rows" in the given table "tableName"
+	This function insert "rows" in the given table "tableName"
 */
 
 func InsertRowsInDb(db *sql.DB, rows []string, tableName string) error {
@@ -240,7 +242,7 @@ func InsertRowsInDb(db *sql.DB, rows []string, tableName string) error {
 }
 
 /*
-This function fills all the tables with the data from the CSV files
+	This function fills all the tables with the data from the CSV files
 */
 
 func fillAllTables(db *sql.DB) error {
@@ -281,7 +283,9 @@ func fillAllTables(db *sql.DB) error {
 	return nil
 }
 
-// Function to import data from a CSV file and insert it into a specified table, with any number of rows "columnNames"
+/*
+	Function to import data from a CSV file and insert it into a specified table, with any number of rows "columnNames"
+*/
 func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []string) error {
 	// Open the CSV file
 	file, err := os.Open(csvPath)

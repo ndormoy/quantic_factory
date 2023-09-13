@@ -56,7 +56,7 @@ func printCustomProgressBar(progress int) {
 }
 
 /*
-Function to get back the var in .env file
+	Function to get back the var in .env file
 */
 func getDotEnvVar(key string) string {
 
@@ -69,7 +69,9 @@ func getDotEnvVar(key string) string {
 	return os.Getenv(key)
 }
 
-// Convert The price from currency to EUR, (Values September 13)
+/*
+	Convert The price from currency to EUR, (Values September 13)
+*/
 
 func convertToEUR(price float64, currency string) (float64, error) {
 	// Define exchange rates for some currencies (you can extend this list)
@@ -123,7 +125,7 @@ func convertToEUR(price float64, currency string) (float64, error) {
 }
 
 /*
-Function to print 10 random entries of the map
+	Function to print 10 random entries of the map
 */
 
 func printRandomEntriesMap(customersMoneySpent map[int64]float64) {
@@ -150,7 +152,7 @@ func printRandomEntriesMap(customersMoneySpent map[int64]float64) {
 }
 
 /*
-
+	Function to calculate quantiles for customers
 */
 
 func calculateQuantiles(data []float64, quantiles []float64) []float64 {

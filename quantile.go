@@ -13,7 +13,7 @@ type QuantileInfo struct {
 }
 
 /*
-Function to create a map with the best clients, last quartile (0.9725)
+	Function to create a map with the best clients, last quartile (0.9725)
 */
 
 func createBestClientMap(spentValues []float64, moneySpentSlice []CustomerSpent) (map[int64]float64, error) {
@@ -45,7 +45,7 @@ func createBestClientMap(spentValues []float64, moneySpentSlice []CustomerSpent)
 }
 
 /*
-Function who create all the quantiles for all the customers, 2.5% by 2.5 until the end
+	Function who create all the quantiles for all the customers, 2.5% by 2.5 until the end
 */
 
 func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {

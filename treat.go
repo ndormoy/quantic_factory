@@ -18,7 +18,7 @@ import (
 )
 
 /*
-Create all maps to return the map with key = CustomerID and value = moneySpent
+	Create all maps to return the map with key = CustomerID and value = moneySpent
 */
 
 func getCustomerSpentMap(db *sql.DB, startDate time.Time) (map[int64]float64, error) {
@@ -44,8 +44,8 @@ func getCustomerSpentMap(db *sql.DB, startDate time.Time) (map[int64]float64, er
 }
 
 /*
-This function get back the ContentID in CustomerEventData where EventTypeID == 6 (purchase)
-We calculate the total purchase amount starting from the startDate
+	This function get back the ContentID in CustomerEventData where EventTypeID == 6 (purchase)
+	We calculate the total purchase amount starting from the startDate
 */
 
 func getContentIDFromPurchaseAfterDate(db *sql.DB, startDate time.Time) ([]int64, error) {
@@ -75,9 +75,9 @@ func getContentIDFromPurchaseAfterDate(db *sql.DB, startDate time.Time) ([]int64
 }
 
 /*
-This function create and return a map with CustomerID and their purchases we multiplie with Quantity of a product.
-We use ContentID from the function getContentIDFromPurchase to retrieve the Price from ContentPrice.
-We return something like this, a map : CustomerIDs = moneySpent
+	This function create and return a map with CustomerID and their purchases we multiplie with Quantity of a product.
+	We use ContentID from the function getContentIDFromPurchase to retrieve the Price from ContentPrice.
+	We return something like this, a map : CustomerIDs = moneySpent
 */
 
 func calculateTotalPurchaseAmountsAfterDate(db *sql.DB, contentIDs []int64, currencyMap map[int64]string, startDate time.Time) (map[int64]float64, error) {
@@ -142,8 +142,8 @@ func calculateTotalPurchaseAmountsAfterDate(db *sql.DB, contentIDs []int64, curr
 }
 
 /*
-This function return a map containing : key = ContentID, value = Currency.
-Permit later to convert the purchase amount to Euros.
+	This function return a map containing : key = ContentID, value = Currency.
+	Permit later to convert the purchase amount to Euros.
 */
 
 func getCurrencyForCustomers(db *sql.DB, contentIDs []int64) (map[int64]string, error) {
