@@ -41,7 +41,6 @@ func getCustomerSpentMap(db *sql.DB) (map[int64]float64, error) {
 	return customerIDs, nil
 }
 
-
 /*
 This function get back the ContentID in CustomerEventData where EventTypeID == 6 (purchase)
 */

@@ -91,6 +91,19 @@ func convertToEUR(price float64, currency string) (float64, error) {
 		"KRW": 0.00070,      // Won south korean
 		"COP": 0.00023,      //Colombian Peso
 		"MXN": 0.054,        // Mexico peso
+		"GMD": 0.015,        // Gambian Dalasi
+		"THB": 0.026,        // Thai Baht
+		"CAD": 0.69,         //Canadian Dollar
+		"AMD": 0.0024,       // Armenian Dram
+		"NGN": 0.0012,       // Nigerian Naira
+		"SEK": 0.084,        // Swedish Krone
+		"VND": 0.000039,     // Vietnamese Dong
+		"DKK": 0.13,         // Danish Krone
+		"IQD": 0.00071,      // Iraqi Dinar
+		"HRK": 0.13272281,   // croatian Kunas
+		"CZK": 0.041,        // Czech Republic Koruna
+		"BGN": 0.51,         // bulgarian leva
+		"ETB": 0.017,        // ethiopian birs
 		// Add more currencies and their exchange rates here
 	}
 
