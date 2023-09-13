@@ -49,26 +49,11 @@ func main() {
 		}
 	}
 
-	contentIDs, err := getContentIDFromPurchase(quanticDB)
+	customersMoneySpent, err := getCustomerSpentMap(quanticDB)
 	if err != nil {
-		log.Printf("Error getting ContentID in CustomerEventData where EventTypeID == 6 in function getContentIDFromPurchase : %s\n", err)
 		return
 	}
-	currencyMap, err := getCurrencyForCustomers(quanticDB, contentIDs)
-	if err != nil {
-		log.Printf("Error getting Currency for Customers in function getCurrencyForCustomers : %s\n", err)
-		return
-	}
-	fmt.Printf("%v", currencyMap)
-	fmt.Printf("--------------------------------\n")
-	customerIDs, err := calculateTotalPurchaseAmounts(quanticDB, contentIDs, currencyMap)
-	if err != nil {
-		log.Printf("Error when creating and return a map with CustomerID and their purchases, in function createMapWithCustomerIDPurchase : %s\n", err)
-		return
-	}
-	// fmt.Printf("customerIDs : %v\n", customerIDs)
-	// Print the map with CustomerID and total Purchase Amount
-	for customerID, purchaseAmount := range customerIDs {
-		fmt.Printf("CustomerID: %d, Total Purchase Amount: %.2f\n", customerID, purchaseAmount)
-	}
+
+	fmt.Printf("---------------------------")
+	fmt.Printf("%v", customersMoneySpent)
 }

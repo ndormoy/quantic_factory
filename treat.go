@@ -17,6 +17,32 @@ import (
 )
 
 /*
+Create all maps to return the map with key = CustomerID and value = moneySpent
+*/
+func getCustomerSpentMap(db *sql.DB) (map[int64]float64, error) {
+	contentIDs, err := getContentIDFromPurchase(db)
+	if err != nil {
+		log.Printf("Error getting ContentID in CustomerEventData where EventTypeID == 6 in function getContentIDFromPurchase : %s\n", err)
+		return nil, err
+	}
+	currencyMap, err := getCurrencyForCustomers(db, contentIDs)
+	if err != nil {
+		log.Printf("Error getting Currency for Customers in function getCurrencyForCustomers : %s\n", err)
+		return nil, err
+	}
+	customerIDs, err := calculateTotalPurchaseAmounts(db, contentIDs, currencyMap)
+	if err != nil {
+		log.Printf("Error when creating and return a map with CustomerID and their purchases, in function createMapWithCustomerIDPurchase : %s\n", err)
+		return nil, err
+	}
+	for customerID, purchaseAmount := range customerIDs {
+		fmt.Printf("CustomerID: %d, Total Purchase Amount: %.2f\n", customerID, purchaseAmount)
+	}
+	return customerIDs, nil
+}
+
+
+/*
 This function get back the ContentID in CustomerEventData where EventTypeID == 6 (purchase)
 */
 
@@ -106,7 +132,6 @@ func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap m
 				}
 				purchaseAmount = convertedAmount
 			}
-
 			// Add the purchase amount to the customer's total
 			customerPurchaseAmounts[customerID] += purchaseAmount
 			processedPurchases[customerID][contentID] = true
@@ -114,6 +139,11 @@ func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap m
 	}
 	return customerPurchaseAmounts, nil
 }
+
+/*
+This function return a map containing : key = ContentID, value = Currency.
+Permit later to convert the purchase amount to Euros.
+*/
 
 func getCurrencyForCustomers(db *sql.DB, contentIDs []int64) (map[int64]string, error) {
 	currencyMap := make(map[int64]string)
@@ -151,9 +181,7 @@ func getCurrencyForCustomers(db *sql.DB, contentIDs []int64) (map[int64]string, 
 			fmt.Printf("zeubi")
 			return nil, err
 		}
-
 		currencyMap[contentID] = currency
 	}
-
 	return currencyMap, nil
 }
