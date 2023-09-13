@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 )
 
 // "fmt"
@@ -49,7 +50,8 @@ func createBestClientMap(spentValues []float64, moneySpentSlice []CustomerSpent)
 */
 
 func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
-	quantiles := []float64{0.025, 0.05, 0.075 /* add more quantiles as needed */, 0.975}
+	// quantiles := []float64{0.025, 0.05, 0.075 /* add more quantiles as needed */, 0.975}
+	quantiles := GenerateQuantiles(0, 1, 0.025)
 	// quantileValues := calculateQuantiles(spentValues, quantiles)
 
 	// Create a map to store quantile information
@@ -90,8 +92,16 @@ func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
 		// fmt.Printf("%.2f%% Quantile: %.2f\n", q*100, quantileValues[i])
 	}
 
+	// Sort the quantile keys
+    sortedQuantiles := make([]float64, 0, len(quantileInfoMap))
+    for q := range quantileInfoMap {
+        sortedQuantiles = append(sortedQuantiles, q)
+    }
+    sort.Float64s(sortedQuantiles)
+
 	// Access quantile information from the map
-	for q, info := range quantileInfoMap {
+	for _, q := range sortedQuantiles {
+        info := quantileInfoMap[q]
 		fmt.Printf("%.2f%% Quantile Info:\n", q*100)
 		fmt.Printf("Number of clients: %d\n", info.NumClients)
 		fmt.Printf("Max Revenue: %.2f\n", info.MaxRevenue)
@@ -99,4 +109,19 @@ func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
 	}
 	return quantileInfoMap
 
+}
+
+/*
+	Function to generate all of the quantile number automatically, with a start a end and step
+	Here : start = 0, end = 1, step = 0.025
+*/
+
+func GenerateQuantiles(start, end, step float64) []float64 {
+	var quantiles []float64
+
+	for q := start; q <= end; q += step {
+		quantiles = append(quantiles, q)
+	}
+
+	return quantiles
 }

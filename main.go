@@ -24,13 +24,6 @@ import (
 	// "github.com/schollz/progressbar/v3"
 )
 
-// Create a struct to represent Customer data
-// type Customer struct {
-// 	CustomerID       int64
-// 	ClientCustomerID int64
-// 	InsertDate       time.Time
-// }
-
 type CustomerSpent struct {
 	CustomerID int64
 	Spent      float64
@@ -42,7 +35,6 @@ func main() {
 	var ip string = getDotEnvVar("IP")
 	var dbname string = "quantic_db"
 	var quanticDB *sql.DB
-	// var customerRevenueMap map[int64]float64
 
 	quanticDB, err := isQuanticDBExists(login, password, ip, dbname)
 	if err != nil {
@@ -62,8 +54,7 @@ func main() {
 	}
 	printRandomEntriesMap(customersMoneySpent)
 
-	// Convert map values to a slice
-	// Create a slice of CustomerSpent
+	// Convert map values to a slice, Create a slice of CustomerSpent
 	moneySpentSlice := make([]CustomerSpent, 0, len(customersMoneySpent))
 	for customerID, spent := range customersMoneySpent {
 		moneySpentSlice = append(moneySpentSlice, CustomerSpent{CustomerID: customerID, Spent: spent})
@@ -100,13 +91,6 @@ func main() {
 	for _, entry := range moneySpentSlice {
 		fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
 	}
-
-	// quantiles := []float64{0.025, 0.05, 0.075 /* add more quantiles as needed */, 0.975}
-	// quantileValues := calculateQuantiles(spentValues, quantiles)
-
-	// for i, q := range quantiles {
-	// 	fmt.Printf("%.2f%% Quantile: %.2f\n", q*100, quantileValues[i])
-	// }
 
 	CreateAllQuantileMap(spentValues)
 }
