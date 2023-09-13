@@ -145,6 +145,64 @@ We return something like this, a map : CustomerIDs = moneySpent
 // 	return customerPurchaseAmounts, nil
 // }
 
+// func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap map[int64]string) (map[int64]float64, error) {
+// 	customerPurchaseAmounts := make(map[int64]float64)
+// 	processedPurchases := make(map[int64]map[int64]bool) // Track processed purchases per customer
+
+// 	for _, contentID := range contentIDs {
+// 		query := `
+//             SELECT CustomerID, Quantity
+//             FROM CustomerEventData
+//             WHERE ContentID = ? AND EventTypeID = 6
+//         `
+// 		rows, err := db.Query(query, contentID)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		defer rows.Close()
+
+// 		for rows.Next() {
+// 			var customerID, quantity int64
+// 			if err := rows.Scan(&customerID, &quantity); err != nil {
+// 				return nil, err
+// 			}
+
+// 			// Check if this purchase has already been processed for this customer
+// 			if processedPurchases[customerID] == nil {
+// 				processedPurchases[customerID] = make(map[int64]bool)
+// 			}
+// 			if processedPurchases[customerID][contentID] {
+// 				continue // Skip if already processed
+// 			}
+
+// 			// Calculate the purchase amount for this specific purchase
+// 			priceQuery := "SELECT Price FROM ContentPrice WHERE ContentID = ?"
+// 			var price float64
+// 			err := db.QueryRow(priceQuery, contentID).Scan(&price)
+// 			if err != nil {
+// 				return nil, err
+// 			}
+// 			purchaseAmount := price * float64(quantity)
+
+// 			// Convert the purchase amount to euros
+// 			var currency string = currencyMap[contentID]
+// 			if currency != "EUR" {
+// 				convertedAmount, err := convertToEUR(purchaseAmount, currency)
+// 				if err != nil {
+// 					return nil, err
+// 				}
+// 				purchaseAmount = convertedAmount
+// 			}
+
+// 			// Add the purchase amount to the customer's total
+// 			customerPurchaseAmounts[customerID] += purchaseAmount
+// 			processedPurchases[customerID][contentID] = true
+// 			// fmt.Printf("Added purchase amount %.2f to CustomerID %d\n", purchaseAmount, customerID)
+// 		}
+// 	}
+// 	return customerPurchaseAmounts, nil
+// }
+
 func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap map[int64]string) (map[int64]float64, error) {
 	customerPurchaseAmounts := make(map[int64]float64)
 	processedPurchases := make(map[int64]map[int64]bool) // Track processed purchases per customer
@@ -175,6 +233,12 @@ func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap m
 				continue // Skip if already processed
 			}
 
+			// Fetch the currency for the contentID
+			currency, ok := currencyMap[contentID]
+			if !ok {
+				return nil, fmt.Errorf("Currency not found for ContentID: %d", contentID)
+			}
+
 			// Calculate the purchase amount for this specific purchase
 			priceQuery := "SELECT Price FROM ContentPrice WHERE ContentID = ?"
 			var price float64
@@ -185,7 +249,6 @@ func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap m
 			purchaseAmount := price * float64(quantity)
 
 			// Convert the purchase amount to euros
-			var currency string = currencyMap[contentID]
 			if currency != "EUR" {
 				convertedAmount, err := convertToEUR(purchaseAmount, currency)
 				if err != nil {
@@ -197,11 +260,12 @@ func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap m
 			// Add the purchase amount to the customer's total
 			customerPurchaseAmounts[customerID] += purchaseAmount
 			processedPurchases[customerID][contentID] = true
-			// fmt.Printf("Added purchase amount %.2f to CustomerID %d\n", purchaseAmount, customerID)
 		}
 	}
 	return customerPurchaseAmounts, nil
 }
+
+
 
 func getCurrencyForCustomers(db *sql.DB, contentIDs []int64) (map[int64]string, error) {
 	currencyMap := make(map[int64]string)

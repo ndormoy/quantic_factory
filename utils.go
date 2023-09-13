@@ -86,6 +86,11 @@ func convertToEUR(price float64, currency string) (float64, error) {
 		"RUB": 103.55,   // Russian Ruble
 		"HNL": 26.45,    // Honduran Lempira
 		"JPY": 158.33,   // Japanese Yen
+		"TND": 3.36,     // Tunisian Dinar
+		"NOK": 11.49,    // Norwegian Krone
+		"KRW": 1425.36,  // Won south korean
+		"COP": 4258.73,  //Colombian Peso
+		"MXN": 18.39,    // Mexico peso
 		// Add more currencies and their exchange rates here
 	}
 
