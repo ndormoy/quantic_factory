@@ -9,6 +9,7 @@ import (
 	// "encoding/csv"
 	"fmt"
 	"log"
+	"sort"
 
 	// "os"
 	// "strings"
@@ -23,10 +24,15 @@ import (
 )
 
 // Create a struct to represent Customer data
-type Customer struct {
-	CustomerID       int64
-	ClientCustomerID int64
-	InsertDate       time.Time
+// type Customer struct {
+// 	CustomerID       int64
+// 	ClientCustomerID int64
+// 	InsertDate       time.Time
+// }
+
+type CustomerSpent struct {
+	CustomerID int64
+	Spent      float64
 }
 
 func main() {
@@ -57,6 +63,20 @@ func main() {
 		return
 	}
 
-	fmt.Printf("---------------------------")
-	fmt.Printf("%v", customersMoneySpent)
+	// Convert map values to a slice
+	// Create a slice of CustomerSpent
+	moneySpentSlice := make([]CustomerSpent, 0, len(customersMoneySpent))
+	for customerID, spent := range customersMoneySpent {
+		moneySpentSlice = append(moneySpentSlice, CustomerSpent{CustomerID: customerID, Spent: spent})
+	}
+
+	// Sort the slice by Spent in descending order
+	sort.Slice(moneySpentSlice, func(i, j int) bool {
+		return moneySpentSlice[i].Spent > moneySpentSlice[j].Spent
+	})
+
+	// Iterate over the sorted slice
+	for _, entry := range moneySpentSlice {
+		fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
+	}
 }
