@@ -7,7 +7,7 @@ Permit to import MySQL
 import (
 	// "context"
 	// "encoding/csv"
-	"fmt"
+	// "fmt"
 	"log"
 	"sort"
 
@@ -54,14 +54,12 @@ func main() {
 			return
 		}
 	}
-
 	startDate := time.Date(2020, 4, 1, 0, 0, 0, 0, time.UTC)
-	// startDate := time.Date(2023, 4, 1, 0, 0, 0, 0, time.UTC)
-
 	customersMoneySpent, err := getCustomerSpentMap(quanticDB, startDate)
 	if err != nil {
 		return
 	}
+	printRandomEntriesMap(customersMoneySpent)
 
 	// Convert map values to a slice
 	// Create a slice of CustomerSpent
@@ -76,7 +74,7 @@ func main() {
 	})
 
 	// Iterate over the sorted slice
-	for _, entry := range moneySpentSlice {
-		fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
-	}
+	// for _, entry := range moneySpentSlice {
+	// 	fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
+	// }
 }

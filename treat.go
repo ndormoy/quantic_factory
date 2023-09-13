@@ -21,7 +21,6 @@ import (
 Create all maps to return the map with key = CustomerID and value = moneySpent
 */
 
-
 func getCustomerSpentMap(db *sql.DB, startDate time.Time) (map[int64]float64, error) {
 	contentIDs, err := getContentIDFromPurchaseAfterDate(db, startDate)
 	if err != nil {

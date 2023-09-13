@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+
+	// "time"
 
 	"github.com/joho/godotenv"
 )
@@ -116,4 +119,28 @@ func convertToEUR(price float64, currency string) (float64, error) {
 	// Convert the price to euros
 	priceInEUR := price * rate
 	return priceInEUR, nil
+}
+
+/*
+Function to print 10 random entries of the map
+*/
+
+func printRandomEntriesMap(customersMoneySpent map[int64]float64) {
+
+	// Shuffle the keys of the map
+	keys := make([]int64, 0, len(customersMoneySpent))
+	for customerID := range customersMoneySpent {
+		keys = append(keys, customerID)
+	}
+	rand.Shuffle(len(keys), func(i, j int) {
+		keys[i], keys[j] = keys[j], keys[i]
+	})
+
+	// Log 10 random entries
+	numEntriesToLog := 10
+	for i := 0; i < numEntriesToLog && i < len(keys); i++ {
+		customerID := keys[i]
+		spent := customersMoneySpent[customerID]
+		log.Printf("CustomerID: %d, Spent: %.2f\n", customerID, spent)
+	}
 }
