@@ -49,7 +49,10 @@ func main() {
 		}
 	}
 
-	customersMoneySpent, err := getCustomerSpentMap(quanticDB)
+	startDate := time.Date(2020, 4, 1, 0, 0, 0, 0, time.UTC)
+	// startDate := time.Date(2023, 4, 1, 0, 0, 0, 0, time.UTC)
+
+	customersMoneySpent, err := getCustomerSpentMap(quanticDB, startDate)
 	if err != nil {
 		return
 	}

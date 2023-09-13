@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	// "time"
 	// "context"
@@ -19,20 +20,42 @@ import (
 /*
 Create all maps to return the map with key = CustomerID and value = moneySpent
 */
-func getCustomerSpentMap(db *sql.DB) (map[int64]float64, error) {
-	contentIDs, err := getContentIDFromPurchase(db)
+// func getCustomerSpentMap(db *sql.DB) (map[int64]float64, error) {
+// 	contentIDs, err := getContentIDFromPurchase(db)
+// 	if err != nil {
+// 		log.Printf("Error getting ContentID in CustomerEventData where EventTypeID == 6 in function getContentIDFromPurchase : %s\n", err)
+// 		return nil, err
+// 	}
+// 	currencyMap, err := getCurrencyForCustomers(db, contentIDs)
+// 	if err != nil {
+// 		log.Printf("Error getting Currency for Customers in function getCurrencyForCustomers : %s\n", err)
+// 		return nil, err
+// 	}
+// 	customerIDs, err := calculateTotalPurchaseAmounts(db, contentIDs, currencyMap)
+// 	if err != nil {
+// 		log.Printf("Error when creating and return a map with CustomerID and their purchases, in function createMapWithCustomerIDPurchase : %s\n", err)
+// 		return nil, err
+// 	}
+// 	for customerID, purchaseAmount := range customerIDs {
+// 		fmt.Printf("CustomerID: %d, Total Purchase Amount: %.2f\n", customerID, purchaseAmount)
+// 	}
+// 	return customerIDs, nil
+// }
+
+func getCustomerSpentMap(db *sql.DB, startDate time.Time) (map[int64]float64, error) {
+	contentIDs, err := getContentIDFromPurchaseAfterDate(db, startDate)
 	if err != nil {
-		log.Printf("Error getting ContentID in CustomerEventData where EventTypeID == 6 in function getContentIDFromPurchase : %s\n", err)
+		log.Printf("Error getting ContentID after %s in function getContentIDFromPurchaseAfterDate: %s\n", startDate.Format("2006-01-02"), err)
 		return nil, err
 	}
 	currencyMap, err := getCurrencyForCustomers(db, contentIDs)
 	if err != nil {
-		log.Printf("Error getting Currency for Customers in function getCurrencyForCustomers : %s\n", err)
+		log.Printf("Error getting Currency for Customers in function getCurrencyForCustomers: %s\n", err)
 		return nil, err
 	}
-	customerIDs, err := calculateTotalPurchaseAmounts(db, contentIDs, currencyMap)
+	customerIDs, err := calculateTotalPurchaseAmountsAfterDate(db, contentIDs, currencyMap, startDate)
 	if err != nil {
-		log.Printf("Error when creating and return a map with CustomerID and their purchases, in function createMapWithCustomerIDPurchase : %s\n", err)
+		log.Printf("Error when creating and returning a map with CustomerID and their purchases in function calculateTotalPurchaseAmounts: %s\n", err)
 		return nil, err
 	}
 	for customerID, purchaseAmount := range customerIDs {
@@ -43,20 +66,20 @@ func getCustomerSpentMap(db *sql.DB) (map[int64]float64, error) {
 
 /*
 This function get back the ContentID in CustomerEventData where EventTypeID == 6 (purchase)
+We calculate the total purchase amount starting from the startDate
 */
 
-func getContentIDFromPurchase(db *sql.DB) ([]int64, error) {
+func getContentIDFromPurchaseAfterDate(db *sql.DB, startDate time.Time) ([]int64, error) {
 	query := `
-	SELECT ContentID
-	FROM CustomerEventData
-	WHERE EventTypeID = 6
-	`
-	rows, err := db.Query(query)
+    SELECT ContentID
+    FROM CustomerEventData
+    WHERE EventTypeID = 6 AND InsertDate >= ?
+    `
+	rows, err := db.Query(query, startDate)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
-	// to ensure proper resource cleanup
 	defer rows.Close()
 
 	var contentIDs []int64
@@ -78,7 +101,7 @@ We use ContentID from the function getContentIDFromPurchase to retrieve the Pric
 We return something like this, a map : CustomerIDs = moneySpent
 */
 
-func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap map[int64]string) (map[int64]float64, error) {
+func calculateTotalPurchaseAmountsAfterDate(db *sql.DB, contentIDs []int64, currencyMap map[int64]string, startDate time.Time) (map[int64]float64, error) {
 	customerPurchaseAmounts := make(map[int64]float64)
 	processedPurchases := make(map[int64]map[int64]bool) // Track processed purchases per customer
 
@@ -86,9 +109,9 @@ func calculateTotalPurchaseAmounts(db *sql.DB, contentIDs []int64, currencyMap m
 		query := `
             SELECT CustomerID, Quantity
             FROM CustomerEventData
-            WHERE ContentID = ? AND EventTypeID = 6
+            WHERE ContentID = ? AND EventTypeID = 6 AND InsertDate >= ?
         `
-		rows, err := db.Query(query, contentID)
+		rows, err := db.Query(query, contentID, startDate)
 		if err != nil {
 			return nil, err
 		}
