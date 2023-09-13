@@ -9,6 +9,7 @@ import (
 	// "time"
 
 	"github.com/joho/godotenv"
+	"gonum.org/v1/gonum/stat"
 )
 
 var processBar = []string{
@@ -127,6 +128,8 @@ Function to print 10 random entries of the map
 
 func printRandomEntriesMap(customersMoneySpent map[int64]float64) {
 
+	fmt.Printf("------------------------------------------------------------\n")
+	fmt.Printf("Printing 10 random entries of the map:\n")
 	// Shuffle the keys of the map
 	keys := make([]int64, 0, len(customersMoneySpent))
 	for customerID := range customersMoneySpent {
@@ -143,4 +146,17 @@ func printRandomEntriesMap(customersMoneySpent map[int64]float64) {
 		spent := customersMoneySpent[customerID]
 		log.Printf("CustomerID: %d, Spent: %.2f\n", customerID, spent)
 	}
+	fmt.Printf("------------------------------------------------------------\n")
+}
+
+/*
+
+*/
+
+func calculateQuantiles(data []float64, quantiles []float64) []float64 {
+    result := make([]float64, len(quantiles))
+    for i, q := range quantiles {
+        result[i] = stat.Quantile(q, stat.Empirical, data, nil)
+    }
+    return result
 }

@@ -7,7 +7,7 @@ Permit to import MySQL
 import (
 	// "context"
 	// "encoding/csv"
-	// "fmt"
+	"fmt"
 	"log"
 	"sort"
 
@@ -19,6 +19,7 @@ import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
+	// "gonum.org/v1/gonum/stat"
 	// "github.com/joho/godotenv"
 	// "github.com/schollz/progressbar/v3"
 )
@@ -68,13 +69,44 @@ func main() {
 		moneySpentSlice = append(moneySpentSlice, CustomerSpent{CustomerID: customerID, Spent: spent})
 	}
 
-	// Sort the slice by Spent in descending order
+	// Create a slice to hold the Spent values
+	spentValues := make([]float64, len(moneySpentSlice))
+	for i, entry := range moneySpentSlice {
+		spentValues[i] = entry.Spent
+	}
+
+	// Sort the Spent values slice in ascending order
+	sort.Float64s(spentValues)
+
+	// Sort the moneySpentSlice by Spent in descending order
 	sort.Slice(moneySpentSlice, func(i, j int) bool {
-		return moneySpentSlice[i].Spent > moneySpentSlice[j].Spent
+		return moneySpentSlice[i].Spent < moneySpentSlice[j].Spent
 	})
 
+	/*-------------------------------*/
+	fmt.Printf("------------------------------------------------------------\n")
+
+	_, err = createBestClientMap(spentValues, moneySpentSlice)
+	if err != nil {
+		log.Printf("Error when creating the map with the best clients: %s\n", err)
+		return
+	}
+
+	fmt.Printf("------------------------------------------------------------\n")
+
+	/*-------------------------------*/
+
 	// Iterate over the sorted slice
-	// for _, entry := range moneySpentSlice {
-	// 	fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
+	for _, entry := range moneySpentSlice {
+		fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
+	}
+
+	// quantiles := []float64{0.025, 0.05, 0.075 /* add more quantiles as needed */, 0.975}
+	// quantileValues := calculateQuantiles(spentValues, quantiles)
+
+	// for i, q := range quantiles {
+	// 	fmt.Printf("%.2f%% Quantile: %.2f\n", q*100, quantileValues[i])
 	// }
+
+	CreateAllQuantileMap(spentValues)
 }
