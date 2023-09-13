@@ -49,93 +49,10 @@ func createBestClientMap(spentValues []float64, moneySpentSlice []CustomerSpent)
 	Function who create all the quantiles for all the customers, 2.5% by 2.5 until the end
 */
 
-// func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
-// 	// quantiles := []float64{0.025, 0.05, 0.075 /* add more quantiles as needed */, 0.975}
-// 	quantiles := GenerateQuantiles(0, 1, 0.025)
-// 	// quantileValues := calculateQuantiles(spentValues, quantiles)
-
-// 	// Create a map to store quantile information
-// 	quantileInfoMap := make(map[float64]QuantileInfo)
-
-// 	for i, q := range quantiles {
-// 		quantile := quantiles[i]
-// 		nextQuantile := 1.0
-// 		if i < len(quantiles)-1 {
-// 			nextQuantile = quantiles[i+1]
-// 		}
-
-// 		// // Calculate the index range for the current quantile
-// 		// startIndex := int(float64(len(spentValues)) * quantile)
-// 		// endIndex := int(float64(len(spentValues)) * nextQuantile)
-
-// 		// // Calculate max and min revenue in the current quantile
-// 		// maxRevenue := spentValues[startIndex]
-// 		// minRevenue := spentValues[startIndex]
-// 		// numClients := endIndex - startIndex
-
-// 		// for j := startIndex; j < endIndex; j++ {
-// 		// 	if spentValues[j] > maxRevenue {
-// 		// 		maxRevenue = spentValues[j]
-// 		// 	}
-// 		// 	if spentValues[j] < minRevenue {
-// 		// 		minRevenue = spentValues[j]
-// 		// 	}
-// 		// }
-// 		startIndex := int(float64(len(spentValues)) * quantile)
-// 		endIndex := int(float64(len(spentValues)) * nextQuantile)
-
-// 		// Initialize minRevenue and maxRevenue with the first value in the current quantile
-// 		minRevenue := spentValues[startIndex]
-// 		maxRevenue := spentValues[startIndex]
-// 		numClients := endIndex - startIndex
-
-// 		// Calculate max and min revenue in the current quantile
-// 		for j := startIndex; j < endIndex; j++ {
-// 			if spentValues[j] > maxRevenue {
-// 				maxRevenue = spentValues[j]
-// 			}
-// 			if spentValues[j] < minRevenue {
-// 				minRevenue = spentValues[j]
-// 			}
-// 		}
-
-// 		// Store quantile information in the map
-// 		quantileInfoMap[q] = QuantileInfo{
-// 			NumClients: numClients,
-// 			MaxRevenue: maxRevenue,
-// 			MinRevenue: minRevenue,
-// 		}
-
-// 		// fmt.Printf("%.2f%% Quantile: %.2f\n", q*100, quantileValues[i])
-// 	}
-
-// 	// Sort the quantile keys
-// 	sortedQuantiles := make([]float64, 0, len(quantileInfoMap))
-// 	for q := range quantileInfoMap {
-// 		sortedQuantiles = append(sortedQuantiles, q)
-// 	}
-// 	sort.Float64s(sortedQuantiles)
-
-// 	// Access quantile information from the map
-// 	for _, q := range sortedQuantiles {
-// 		info := quantileInfoMap[q]
-// 		fmt.Printf("%.2f%% Quantile Info:\n", q*100)
-// 		fmt.Printf("Number of clients: %d\n", info.NumClients)
-// 		fmt.Printf("Max Revenue: %.2f\n", info.MaxRevenue)
-// 		fmt.Printf("Min Revenue: %.2f\n\n", info.MinRevenue)
-// 	}
-// 	return quantileInfoMap
-
-// }
-
 func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
 	// Sort the spentValues array
 	sort.Float64s(spentValues)
-
-	// quantiles := []float64{0.025, 0.05, 0.075 /* add more quantiles as needed */, 0.975}
 	quantiles := GenerateQuantiles(0, 1, 0.025)
-	// quantileValues := calculateQuantiles(spentValues, quantiles)
-
 	// Create a map to store quantile information
 	quantileInfoMap := make(map[float64]QuantileInfo)
 
@@ -145,16 +62,13 @@ func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
 		if i < len(quantiles)-1 {
 			nextQuantile = quantiles[i+1]
 		}
-
 		// Calculate the index range for the current quantile, rounding appropriately
-		startIndex := int(float64(len(spentValues)-1) * quantile + 0.5)
-		endIndex := int(float64(len(spentValues)-1) * nextQuantile + 0.5)
-
+		startIndex := int(float64(len(spentValues)-1)*quantile + 0.5)
+		endIndex := int(float64(len(spentValues)-1)*nextQuantile + 0.5)
 		// Initialize minRevenue and maxRevenue with the first value in the current quantile
 		minRevenue := spentValues[startIndex]
 		maxRevenue := spentValues[startIndex]
 		numClients := endIndex - startIndex
-
 		// Calculate max and min revenue in the current quantile
 		for j := startIndex; j < endIndex; j++ {
 			if spentValues[j] > maxRevenue {
@@ -164,14 +78,12 @@ func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
 				minRevenue = spentValues[j]
 			}
 		}
-
 		// Store quantile information in the map
 		quantileInfoMap[q] = QuantileInfo{
 			NumClients: numClients,
 			MaxRevenue: maxRevenue,
 			MinRevenue: minRevenue,
 		}
-
 		// fmt.Printf("%.2f%% Quantile: %.2f\n", q*100, quantileValues[i])
 	}
 
@@ -181,7 +93,6 @@ func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
 		sortedQuantiles = append(sortedQuantiles, q)
 	}
 	sort.Float64s(sortedQuantiles)
-
 	// Access quantile information from the map
 	for _, q := range sortedQuantiles {
 		info := quantileInfoMap[q]
@@ -192,8 +103,6 @@ func CreateAllQuantileMap(spentValues []float64) map[float64]QuantileInfo {
 	}
 	return quantileInfoMap
 }
-
-
 
 /*
 	Function to generate all of the quantile number automatically, with a start a end and step
