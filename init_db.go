@@ -1,30 +1,30 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"encoding/csv"
 	"fmt"
 	"log"
-	"time"
-	"context"
 	"os"
-	"encoding/csv"
 	"strings"
+	"time"
 )
 
 /*Check if database already exists, if the db exists, return the instance of this Db */
 
 func isQuanticDBExists(login, password, ip, dbname string) (*sql.DB, error) {
 	log.Printf("Checking if database exists...")
-	quanticDB, err := sql.Open("mysql", dsn(login, password, ip, dbname))
+	db, err := sql.Open("mysql", dsn(login, password, ip, "mysql"))
 	if err != nil {
 		log.Printf("Error when connecting to 'quantic_db' DB\n")
 		return nil, err
 	}
-	// defer quanticDB.Close() // Close the connection to 'quantic_db'
+	defer db.Close() // Close the connection to 'quantic_db'
 
 	// Check if the database exists
 	var dbName string
-	row := quanticDB.QueryRow("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?", dbname)
+	row := db.QueryRow("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?", dbname)
 	if err := row.Scan(&dbName); err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("Database does not exist. Continuing...\n")
@@ -34,7 +34,12 @@ func isQuanticDBExists(login, password, ip, dbname string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	log.Printf("Database already exists. Skipping initialization and data import.\n")
+	log.Printf("Database already exists. Skipping initialization and data import.\nConnecting to 'quantic_db' DB [...]\n")
+	quanticDB, err := sql.Open("mysql", dsn(login, password, ip, dbname))
+	if err != nil {
+		log.Printf("Error when connecting to 'quantic_db' DB\n")
+		return nil, err
+	}
 	return quanticDB, nil
 }
 
@@ -44,7 +49,6 @@ return the good formated string to connect to the database
 func dsn(login string, password string, ip string, dbName string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&allowAllFiles=true", login, password, ip, dbName)
 }
-
 
 /*
 This function will create the DB, and fill the schema with csv.
@@ -276,7 +280,6 @@ func fillAllTables(db *sql.DB) error {
 
 	return nil
 }
-
 
 // Function to import data from a CSV file and insert it into a specified table, with any number of rows "columnNames"
 func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []string) error {
