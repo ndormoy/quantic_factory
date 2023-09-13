@@ -13,6 +13,7 @@ type QuantileInfo struct {
 	MinRevenue float64
 }
 
+
 /*
 	Function to create a map with the best clients, last quartile (0.9725)
 */
