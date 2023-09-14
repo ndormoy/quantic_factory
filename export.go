@@ -3,28 +3,29 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func manageExport(db *sql.DB, moneySpentSlice []CustomerSpent) error {
+func manageExport(db *sql.DB, moneySpentSlice []CustomerSpent, currentDate string) error {
 
+	// Combine with a prefix test_export_
+	var tableName string = "test_export_" + currentDate
+
+	// Activate for testing creating tables on different days
+	// var tableName string = "test_export_20230915"
 	// Create the 'test_export_DATE' table if it doesn't exist
-	_, err := db.Exec(`
-        CREATE TABLE IF NOT EXISTS test_export_DATE (
-            DATE DATE,
-            CustomerID BIGINT,
-            CA DOUBLE,
-            PRIMARY KEY (DATE, CustomerID)
-        )
-    `)
+	_, err := db.Exec(fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s (
+			DATE DATE,
+			CustomerID BIGINT,
+			CA DOUBLE,
+			PRIMARY KEY (DATE, CustomerID)
+		)
+	`, tableName))
 	if err != nil {
 		return fmt.Errorf("error creating the table: %w", err)
 	}
-
-	// Generate the date in YYYYMMDD format
-	currentDate := time.Now().Format("20060102")
 
 	// Begin a transaction for the bulk insert
 	tx, err := db.Begin()
@@ -33,7 +34,7 @@ func manageExport(db *sql.DB, moneySpentSlice []CustomerSpent) error {
 	}
 
 	// Prepare the bulk insert statement
-	stmt, err := tx.Prepare("INSERT INTO test_export_DATE (DATE, CustomerID, CA) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE CA = ?")
+	stmt, err := tx.Prepare(fmt.Sprintf("INSERT INTO %s (DATE, CustomerID, CA) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE CA = ?", tableName))
 	if err != nil {
 		return fmt.Errorf("error preparing statement: %w", err)
 	}
@@ -55,55 +56,36 @@ func manageExport(db *sql.DB, moneySpentSlice []CustomerSpent) error {
 	return nil
 }
 
-
-// func createCustomerEventData(db *sql.DB, eventData structCustomerEventData) error {
-
-// 	// Create new customer event
-// 	fmt.Printf("DEBUG : %d\n", eventData.EventID)
-// 	if err := createNewCustomerEvent(db, eventData); err != nil {
-// 		return err
-// 	}
-
-// 	// Insert the event data into the CustomerEventData table
-// 	_, err := db.Exec(`
-//         INSERT INTO CustomerEventData (EventDataID, EventID, ContentID, CustomerID, EventTypeID, EventDate, Quantity, InsertDate)
-//         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-//     `, 2222222222, eventData.EventID, eventData.ContentID, eventData.CustomerID, eventData.EventTypeID, eventData.EventDate, eventData.Quantity, eventData.InsertDate)
-
-// 	if err != nil {
-// 		return fmt.Errorf("error creating a new CustomerEventData: %w", err)
-// 	}
-
-// 	return nil
-// }
+/*
+	Fonction that creates a new CustomerEvent and a new CustomerEventData, to test the export
+*/
 
 func createCustomerEventData(db *sql.DB, eventData structCustomerEventData) error {
-    // Create new customer event
-    fmt.Printf("DEBUG : %d\n", eventData.EventID)
-    if err := createNewCustomerEvent(db, eventData); err != nil {
-        return err
-    }
+	// Create new customer event
+	if err := createNewCustomerEvent(db, eventData); err != nil {
+		return err
+	}
 
-    // Check if the event data with EventDataID 2222222222 already exists in CustomerEventData
-    var count int
-    err := db.QueryRow("SELECT COUNT(*) FROM CustomerEventData WHERE EventDataID = ?", 2222222222).Scan(&count)
-    if err != nil {
-        return fmt.Errorf("error checking if the CustomerEventData entry exists: %w", err)
-    }
+	// Check if the event data with EventDataID 2222222222 already exists in CustomerEventData
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM CustomerEventData WHERE EventDataID = ?", 2222222222).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("error checking if the CustomerEventData entry exists: %w", err)
+	}
 
-    if count == 0 {
-        // Insert the event data into the CustomerEventData table
-        _, err := db.Exec(`
-            INSERT INTO CustomerEventData (EventDataID, EventID, ContentID, CustomerID, EventTypeID, EventDate, Quantity, InsertDate)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, 2222222222, eventData.EventID, eventData.ContentID, eventData.CustomerID, eventData.EventTypeID, eventData.EventDate, eventData.Quantity, eventData.InsertDate)
+	if count == 0 {
+		// Insert the event data into the CustomerEventData table
+		_, err := db.Exec(`
+			INSERT INTO CustomerEventData (EventDataID, EventID, ContentID, CustomerID, EventTypeID, EventDate, Quantity, InsertDate)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		`, 2222222222, eventData.EventID, eventData.ContentID, eventData.CustomerID, eventData.EventTypeID, eventData.EventDate, eventData.Quantity, eventData.InsertDate)
 
-        if err != nil {
-            return fmt.Errorf("error creating a new CustomerEventData: %w", err)
-        }
-    }
+		if err != nil {
+			return fmt.Errorf("error creating a new CustomerEventData: %w", err)
+		}
+	}
 
-    return nil
+	return nil
 }
 
 func createNewCustomerEvent(db *sql.DB, eventData structCustomerEventData) error {
@@ -113,19 +95,17 @@ func createNewCustomerEvent(db *sql.DB, eventData structCustomerEventData) error
 	var eventExists int
 	err := db.QueryRow("SELECT COUNT(*) FROM CustomerEvent WHERE EventID = ?", eventData.EventID).Scan(&eventExists)
 	if err != nil {
-		fmt.Print("MDR")
 		return fmt.Errorf("error checking if the event exists: %w", err)
 	}
 
 	if eventExists == 0 {
 		// The event does not exist, so insert it
 		_, err = db.Exec(`
-            INSERT INTO CustomerEvent (EventID, ClientEventID, InsertDate)
-            VALUES (?, ?, ?)
-        `, eventData.EventID, ClientEventID, eventData.InsertDate)
+			INSERT INTO CustomerEvent (EventID, ClientEventID, InsertDate)
+			VALUES (?, ?, ?)
+		`, eventData.EventID, ClientEventID, eventData.InsertDate)
 
 		if err != nil {
-			fmt.Print("MDR")
 			return fmt.Errorf("error creating a new customer event: %w", err)
 		}
 	}

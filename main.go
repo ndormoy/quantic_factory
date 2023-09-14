@@ -6,7 +6,6 @@ Permit to import MySQL
 */
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 
@@ -47,6 +46,27 @@ func main() {
 			return
 		}
 	}
+
+	//----------------------------------------------------------------------
+	//Testing if export changes
+
+	currentDate := time.Now().Format("20060102")
+	// err = createCustomerEventData(quanticDB, structCustomerEventData{
+	// 	EventID:     1656516851, // Specify the actual values here
+	// 	ContentID:   1726958166,
+	// 	CustomerID:  2065908675,
+	// 	EventTypeID: 6,
+	// 	EventDate:   currentDate, // Use the appropriate date
+	// 	Quantity:    1,           // Specify the quantity
+	// 	InsertDate:  currentDate, // Use the appropriate date
+	// })
+	// if err != nil {
+	// 	log.Printf("%s\n", err)
+	// 	return
+	// }
+	// log.Printf("New CustomerEventData created\n")
+	//----------------------------------------------------------------------
+
 	customersMoneySpent, err := getCustomerSpentMap(quanticDB, startDate)
 	if err != nil {
 		return
@@ -75,28 +95,6 @@ func main() {
 	printSpentSlice(moneySpentSlice)
 
 	CalculateQuantilesNearestRank(spentValues, 40)
-	fmt.Print("Hello World\n")
-	// err =  createNewCustomerEventData(quanticDB, 2065908675, 6, 1656516851, 1726958166)
-	// if err != nil {
-	// 	log.Printf("%s\n", err)
-	// 	return
-	// }
-	currentDate := time.Now().Format("20060102")
-	err = createCustomerEventData(quanticDB, structCustomerEventData {
-		EventID:     1656516851, // Specify the actual values here
-		ContentID:   1726958166,
-		CustomerID:  2065908675,
-		EventTypeID: 6,
-		EventDate:   currentDate, // Use the appropriate date
-		Quantity:    1,           // Specify the quantity
-		InsertDate:  currentDate, // Use the appropriate date
-	})
 
-	if err != nil {
-		log.Printf("%s\n", err)
-		return
-	}
-
-	fmt.Print("POUETPOUET\n")
-	manageExport(quanticDB, moneySpentSlice)
+	manageExport(quanticDB, moneySpentSlice, currentDate)
 }

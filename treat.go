@@ -50,10 +50,10 @@ func getCustomerSpentMap(db *sql.DB, startDate time.Time) (map[int64]float64, er
 
 func getContentIDFromPurchaseAfterDate(db *sql.DB, startDate time.Time) ([]int64, error) {
 	query := `
-    SELECT ContentID
-    FROM CustomerEventData
-    WHERE EventTypeID = 6 AND InsertDate >= ?
-    `
+	SELECT ContentID
+	FROM CustomerEventData
+	WHERE EventTypeID = 6 AND InsertDate >= ?
+	`
 	rows, err := db.Query(query, startDate)
 	if err != nil {
 		log.Fatal(err)
@@ -86,10 +86,10 @@ func calculateTotalPurchaseAmountsAfterDate(db *sql.DB, contentIDs []int64, curr
 
 	for _, contentID := range contentIDs {
 		query := `
-            SELECT CustomerID, Quantity
-            FROM CustomerEventData
-            WHERE ContentID = ? AND EventTypeID = 6 AND InsertDate >= ?
-        `
+			SELECT CustomerID, Quantity
+			FROM CustomerEventData
+			WHERE ContentID = ? AND EventTypeID = 6 AND InsertDate >= ?
+		`
 		rows, err := db.Query(query, contentID, startDate)
 		if err != nil {
 			return nil, err
@@ -151,10 +151,10 @@ func getCurrencyForCustomers(db *sql.DB, contentIDs []int64) (map[int64]string, 
 
 	// Query to get Currency for multiple ContentIDs using IN clause
 	query := `
-        SELECT ContentID, Currency
-        FROM ContentPrice
-        WHERE ContentID IN (?)
-    `
+		SELECT ContentID, Currency
+		FROM ContentPrice
+		WHERE ContentID IN (?)
+	`
 
 	// Create a comma-separated list of contentIDs for the query
 	contentIDStr := ""
