@@ -125,15 +125,7 @@ func manageExport(db *sql.DB, moneySpentSlice []CustomerSpent) error {
 // 	return nil
 // }
 
-type structCustomerEventData struct {
-	EventID     int64
-	ContentID   int64
-	CustomerID  int64
-	EventTypeID int64
-	EventDate   string
-	Quantity    int
-	InsertDate  string
-}
+
 
 func createCustomerEventData(db *sql.DB, eventData structCustomerEventData) error {
 
@@ -145,9 +137,9 @@ func createCustomerEventData(db *sql.DB, eventData structCustomerEventData) erro
 
 	// Insert the event data into the CustomerEventData table
 	_, err := db.Exec(`
-        INSERT INTO CustomerEventData (EventID, ContentID, CustomerID, EventTypeID, EventDate, Quantity, InsertDate)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, eventData.EventID, eventData.ContentID, eventData.CustomerID, eventData.EventTypeID, eventData.EventDate, eventData.Quantity, eventData.InsertDate)
+        INSERT INTO CustomerEventData (EventDataID, EventID, ContentID, CustomerID, EventTypeID, EventDate, Quantity, InsertDate)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `, 2222222222, eventData.EventID, eventData.ContentID, eventData.CustomerID, eventData.EventTypeID, eventData.EventDate, eventData.Quantity, eventData.InsertDate)
 
 	if err != nil {
 		return fmt.Errorf("error creating a new CustomerEventData: %w", err)

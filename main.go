@@ -18,6 +18,16 @@ type CustomerSpent struct {
 	Spent      float64
 }
 
+type structCustomerEventData struct {
+	EventID     int64
+	ContentID   int64
+	CustomerID  int64
+	EventTypeID int64
+	EventDate   string
+	Quantity    int
+	InsertDate  string
+}
+
 func main() {
 	var login string = getDotEnvVar("LOGIN")
 	var password string = getDotEnvVar("PASSWORD")
@@ -72,15 +82,7 @@ func main() {
 	// 	return
 	// }
 	currentDate := time.Now().Format("20060102")
-	err = createCustomerEventData(quanticDB, struct {
-		EventID     int64
-		ContentID   int64
-		CustomerID  int64
-		EventTypeID int64
-		EventDate   string
-		Quantity    int
-		InsertDate  string
-	}{
+	err = createCustomerEventData(quanticDB, structCustomerEventData {
 		EventID:     1656516851, // Specify the actual values here
 		ContentID:   1726958166,
 		CustomerID:  2065908675,
