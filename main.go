@@ -91,18 +91,6 @@ func main() {
 	for _, entry := range moneySpentSlice {
 		fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
 	}
-
-	// CreateAllQuantileMap(spentValues), 40 is the number of quantiles
-	quantileInfoMap, quantiles := CalculateQuantilesNearestRank(spentValues, 40)
-	for _, q := range quantiles {
-		// fmt.Print("q = %f ", q)
-		// fmt.Printf("%.2f%% Quantile Info:\n", q*100)
-		info := quantileInfoMap[q]
-		fmt.Printf("%.2f%% Quantile Info:\n", q*100 - 2.5)
-		fmt.Printf("Number of clients: %d\n", info.NumClients)
-		fmt.Printf("Max Revenue: %.2f\n", info.MaxRevenue)
-		fmt.Printf("Min Revenue: %.2f\n\n", info.MinRevenue)
-	}
-	
+	CalculateQuantilesNearestRank(spentValues, 40)
 
 }
