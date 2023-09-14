@@ -40,3 +40,5 @@ It simulate a new day (2023 09 15), change the day if we are on the same day.
 - The Email is not added in the struct of the export table because i think i misunderstood how channeltype has to be implemented.  
 For me we don t had to fill ChannelType, so its just a number between 1 and 5 representing how the client was contacted.  
 Same thing for EventType, number between 1 and 6 representing the type of event (visit, purchase...)
+
+- Using MySQLWorkbench to visualize the database
