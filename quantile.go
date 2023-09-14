@@ -128,19 +128,8 @@ func GenerateQuantiles(start, end, step float64) []float64 {
 */
 
 func sortMySlices(spentValues *[]float64, moneySpentSlice *[]CustomerSpent) {
-    sort.Float64s(*spentValues)
+	sort.Float64s(*spentValues)
 	sort.Slice(*moneySpentSlice, func(i, j int) bool {
-        return (*moneySpentSlice)[i].Spent > (*moneySpentSlice)[j].Spent
-    })
+		return (*moneySpentSlice)[i].Spent > (*moneySpentSlice)[j].Spent
+	})
 }
-
-// func sortSpentValues(spentValues *[]float64) {
-//     sort.Float64s(*spentValues)
-// }
-
-// // Function to sort the moneySpentSlice by Spent in descending order in place
-// func sortMoneySpentSlice(moneySpentSlice *[]CustomerSpent) {
-//     sort.Slice(*moneySpentSlice, func(i, j int) bool {
-//         return (*moneySpentSlice)[i].Spent > (*moneySpentSlice)[j].Spent
-//     })
-// }

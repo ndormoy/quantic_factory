@@ -77,4 +77,5 @@ func main() {
 
 	CalculateQuantilesNearestRank(spentValues, 40)
 
+	manageExport(quanticDB, moneySpentSlice)
 }
