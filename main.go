@@ -5,23 +5,12 @@ Import github.com/go-sql-driver/mysql
 Permit to import MySQL
 */
 import (
-	// "context"
-	// "encoding/csv"
-	// "fmt"
-	"log"
-	// "sort"
-
-	// "os"
-	// "strings"
-	"time"
-	// "bufio"
-	// Import godotenv
 	"database/sql"
+	"fmt"
+	"log"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	// "gonum.org/v1/gonum/stat"
-	// "github.com/joho/godotenv"
-	// "github.com/schollz/progressbar/v3"
 )
 
 type CustomerSpent struct {
@@ -72,10 +61,40 @@ func main() {
 		log.Printf("Error when creating the map with the best clients: %s\n", err)
 		return
 	}
-	
+
 	printSpentSlice(moneySpentSlice)
 
 	CalculateQuantilesNearestRank(spentValues, 40)
+	fmt.Print("Hello World\n")
+	// err =  createNewCustomerEventData(quanticDB, 2065908675, 6, 1656516851, 1726958166)
+	// if err != nil {
+	// 	log.Printf("%s\n", err)
+	// 	return
+	// }
+	currentDate := time.Now().Format("20060102")
+	err = createCustomerEventData(quanticDB, struct {
+		EventID     int64
+		ContentID   int64
+		CustomerID  int64
+		EventTypeID int64
+		EventDate   string
+		Quantity    int
+		InsertDate  string
+	}{
+		EventID:     1656516851, // Specify the actual values here
+		ContentID:   1726958166,
+		CustomerID:  2065908675,
+		EventTypeID: 6,
+		EventDate:   currentDate, // Use the appropriate date
+		Quantity:    1,           // Specify the quantity
+		InsertDate:  currentDate, // Use the appropriate date
+	})
 
+	if err != nil {
+		log.Printf("%s\n", err)
+		return
+	}
+
+	fmt.Print("POUETPOUET\n")
 	manageExport(quanticDB, moneySpentSlice)
 }
