@@ -48,9 +48,13 @@ func main() {
 	}
 
 	//----------------------------------------------------------------------
-	//Testing if export changes
 
 	currentDate := time.Now().Format("20060102")
+
+	/*
+		Uncomment to test if the Export Tables change when some CustomerEvent is added
+		with eventType 6, on customer 2065908675
+	*/
 	// err = createCustomerEventData(quanticDB, structCustomerEventData{
 	// 	EventID:     1656516851, // Specify the actual values here
 	// 	ContentID:   1726958166,

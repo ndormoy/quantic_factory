@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"time"
 
 	// "time"
 
@@ -47,6 +48,14 @@ var processBar2 = []string{
 	"100%:[##########################################]\n",
 }
 
+func printSimpleProgressBar(message string) {
+	log.Printf("%s", message)
+	for _, val := range processBar {
+		fmt.Printf("\r \a%s", val)
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
 func printCustomProgressBar(progress int) {
 	if progress < 0 || progress > 100 {
 		return
@@ -56,8 +65,9 @@ func printCustomProgressBar(progress int) {
 }
 
 /*
-Function to get back the var in .env file
+	Function to get back the var in .env file
 */
+
 func getDotEnvVar(key string) string {
 
 	// load .env file

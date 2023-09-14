@@ -46,22 +46,21 @@ func isQuanticDBExists(login, password, ip, dbname string) (*sql.DB, error) {
 }
 
 /*
-return the good formated string to connect to the database
+	return the good formated string to connect to the database
 */
+
 func dsn(login string, password string, ip string, dbName string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true&clientFoundRows=true&allowAllFiles=true", login, password, ip, dbName)
 }
 
 /*
-This function will create the DB, and fill the schema with csv.
-Will file the TypeTable, and the other table.
+	This function will create the DB, and fill the schema with csv.
+	Will file the TypeTable, and the other table.
 */
+
 func initAndFill(login string, password string, ip string, dbname string) (*sql.DB, error) {
-	log.Printf("Creating database schema [...]")
-	for _, val := range processBar {
-		fmt.Printf("\r \a%s", val)
-		time.Sleep(50 * time.Millisecond)
-	}
+
+	printSimpleProgressBar("Creating database schema [...]")
 
 	quanticDB, err := initializeQuanticDB(login, password, ip, dbname)
 	if err != nil {
@@ -79,7 +78,6 @@ func initAndFill(login string, password string, ip string, dbname string) (*sql.
 
 	log.Printf("Filling Tables types [...]")
 	if err := createTypesTables(quanticDB); err != nil {
-		// log.Printf("Error %s when creating types tables\n", err)
 		return nil, err
 	}
 	log.Printf("Filling Tables [...]")
@@ -94,7 +92,7 @@ func initAndFill(login string, password string, ip string, dbname string) (*sql.
 }
 
 /*
-Create the database 'quantic_db' if it doesn't exist and open the connection to it
+	Create the database 'quantic_db' if it doesn't exist and open the connection to it
 */
 func initializeQuanticDB(login, password, ip, dbname string) (*sql.DB, error) {
 	// Open the connection to 'mysql' database and create 'quantic_db'
@@ -123,8 +121,9 @@ func initializeQuanticDB(login, password, ip, dbname string) (*sql.DB, error) {
 }
 
 /*
-Create the database schema for the given Database
+	Create the database schema for the given Database
 */
+
 func createDatabaseSchema(db *sql.DB) error {
 	// SQL script with table creation and constraints
 	schemaSQL := `
@@ -198,8 +197,6 @@ func createDatabaseSchema(db *sql.DB) error {
             PRIMARY KEY (ContentPriceID),
             FOREIGN KEY (ContentID) REFERENCES Content (ContentID)
         );
-
-        
     `
 
 	_, err := db.Exec(schemaSQL)
@@ -210,8 +207,9 @@ func createDatabaseSchema(db *sql.DB) error {
 }
 
 /*
-This function creates the tables ChannelType and EventType
+	This function creates the tables ChannelType and EventType
 */
+
 func createTypesTables(db *sql.DB) error {
 	channelTypes := []string{"Email", "PhoneNumber", "Postal", "MobileID", "Cookie"}
 	if err := InsertRowsInDb(db, channelTypes, "ChannelType"); err != nil {
@@ -246,7 +244,7 @@ func InsertRowsInDb(db *sql.DB, rows []string, tableName string) error {
 */
 
 func fillAllTables(db *sql.DB) error {
-	//Creates columnNames for each table in the schema
+	// Creates columnNames for each table in the schema
 	columnNamesCustomer := []string{"CustomerID", "ClientCustomerID", "InsertDate"}
 	columnNamesCustomerData := []string{"CustomerChannelID", "CustomerID", "ChannelTypeID", "ChannelValue", "InsertDate"}
 	columnNamesCustomerEvent := []string{"EventID", "ClientEventID", "InsertDate"}
@@ -284,8 +282,9 @@ func fillAllTables(db *sql.DB) error {
 }
 
 /*
-Function to import data from a CSV file and insert it into a specified table, with any number of rows "columnNames"
+	Function to import data from a CSV file and insert it into a specified table, with any number of rows "columnNames"
 */
+
 func importDataFromCSV(db *sql.DB, csvPath, tableName string, columnNames []string) error {
 	// Open the CSV file
 	file, err := os.Open(csvPath)

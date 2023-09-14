@@ -19,6 +19,7 @@ type QuantileInfo struct {
 */
 
 func createBestClientMap(spentValues []float64, moneySpentSlice []CustomerSpent) (map[int64]float64, error) {
+	printSimpleProgressBar("Creating BestClientMap [...]")
 	printSeparator()
 	// Calculate the quantile value for the first quantile (2.5%)
 	lastQuantile := 0.975
@@ -50,6 +51,7 @@ func createBestClientMap(spentValues []float64, moneySpentSlice []CustomerSpent)
 */
 
 func CalculateQuantilesNearestRank(spentValues []float64, numQuantiles int) (map[float64]QuantileInfo, []float64) {
+	printSimpleProgressBar("Creating All quantiles for Customers [...]")
 	// Sort the spentValues array
 	sort.Float64s(spentValues)
 	// Create a map to store quantile information

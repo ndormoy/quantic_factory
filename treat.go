@@ -22,6 +22,7 @@ import (
 */
 
 func getCustomerSpentMap(db *sql.DB, startDate time.Time) (map[int64]float64, error) {
+	printSimpleProgressBar("Creating CustomerSpentMap [...]")
 	contentIDs, err := getContentIDFromPurchaseAfterDate(db, startDate)
 	if err != nil {
 		log.Printf("Error getting ContentID after %s in function getContentIDFromPurchaseAfterDate: %s\n", startDate.Format("2006-01-02"), err)
@@ -37,9 +38,6 @@ func getCustomerSpentMap(db *sql.DB, startDate time.Time) (map[int64]float64, er
 		log.Printf("Error when creating and returning a map with CustomerID and their purchases in function calculateTotalPurchaseAmounts: %s\n", err)
 		return nil, err
 	}
-	// for customerID, purchaseAmount := range customerIDs {
-	// 	fmt.Printf("CustomerID: %d, Total Purchase Amount: %.2f\n", customerID, purchaseAmount)
-	// }
 	return customerIDs, nil
 }
 
@@ -95,7 +93,6 @@ func calculateTotalPurchaseAmountsAfterDate(db *sql.DB, contentIDs []int64, curr
 			return nil, err
 		}
 		defer rows.Close()
-
 		for rows.Next() {
 			var customerID, quantity int64
 			if err := rows.Scan(&customerID, &quantity); err != nil {
