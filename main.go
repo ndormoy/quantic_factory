@@ -7,7 +7,7 @@ Permit to import MySQL
 import (
 	// "context"
 	// "encoding/csv"
-	"fmt"
+	// "fmt"
 	"log"
 	"sort"
 
@@ -35,6 +35,7 @@ func main() {
 	var ip string = getDotEnvVar("IP")
 	var dbname string = "quantic_db"
 	var quanticDB *sql.DB
+	var startDate = time.Date(2020, 4, 1, 0, 0, 0, 0, time.UTC)
 
 	quanticDB, err := isQuanticDBExists(login, password, ip, dbname)
 	if err != nil {
@@ -47,7 +48,6 @@ func main() {
 			return
 		}
 	}
-	startDate := time.Date(2020, 4, 1, 0, 0, 0, 0, time.UTC)
 	customersMoneySpent, err := getCustomerSpentMap(quanticDB, startDate)
 	if err != nil {
 		return
@@ -68,29 +68,19 @@ func main() {
 
 	// Sort the Spent values slice in ascending order
 	sort.Float64s(spentValues)
-
 	// Sort the moneySpentSlice by Spent in descending order
 	sort.Slice(moneySpentSlice, func(i, j int) bool {
 		return moneySpentSlice[i].Spent < moneySpentSlice[j].Spent
 	})
-
-	/*-------------------------------*/
-	fmt.Printf("------------------------------------------------------------\n")
 
 	_, err = createBestClientMap(spentValues, moneySpentSlice)
 	if err != nil {
 		log.Printf("Error when creating the map with the best clients: %s\n", err)
 		return
 	}
+	
+	printSpentSlice(moneySpentSlice)
 
-	fmt.Printf("------------------------------------------------------------\n")
-
-	/*-------------------------------*/
-
-	// Iterate over the sorted slice
-	for _, entry := range moneySpentSlice {
-		fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
-	}
 	CalculateQuantilesNearestRank(spentValues, 40)
 
 }

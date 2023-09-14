@@ -19,15 +19,13 @@ type QuantileInfo struct {
 */
 
 func createBestClientMap(spentValues []float64, moneySpentSlice []CustomerSpent) (map[int64]float64, error) {
+	printSeparator()
 	// Calculate the quantile value for the first quantile (2.5%)
 	lastQuantile := 0.975
-
 	// Calculate the index of the client that represents the first quantile
 	index := int(float64(len(spentValues)) * lastQuantile)
-
 	// Create a map to store the N clients of the first quantile
 	lastQuantileClients := make(map[int64]float64)
-
 	// Iterate through the sorted spentValues and add N clients to the map
 	for i := index; i < len(spentValues); i++ {
 		lastQuantileClients[moneySpentSlice[i].CustomerID] = spentValues[i]
@@ -43,6 +41,7 @@ func createBestClientMap(spentValues []float64, moneySpentSlice []CustomerSpent)
 	if len(lastQuantileClients) == 0 {
 		return nil, fmt.Errorf("no best clients found")
 	}
+	printSeparator()
 	return lastQuantileClients, nil
 }
 

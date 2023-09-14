@@ -56,7 +56,7 @@ func printCustomProgressBar(progress int) {
 }
 
 /*
-	Function to get back the var in .env file
+Function to get back the var in .env file
 */
 func getDotEnvVar(key string) string {
 
@@ -130,7 +130,7 @@ func convertToEUR(price float64, currency string) (float64, error) {
 
 func printRandomEntriesMap(customersMoneySpent map[int64]float64) {
 
-	fmt.Printf("------------------------------------------------------------\n")
+	printSeparator()
 	fmt.Printf("Printing 10 random entries of the map:\n")
 	// Shuffle the keys of the map
 	keys := make([]int64, 0, len(customersMoneySpent))
@@ -148,7 +148,6 @@ func printRandomEntriesMap(customersMoneySpent map[int64]float64) {
 		spent := customersMoneySpent[customerID]
 		log.Printf("CustomerID: %d, Spent: %.2f\n", customerID, spent)
 	}
-	fmt.Printf("------------------------------------------------------------\n")
 }
 
 /*
@@ -156,9 +155,30 @@ func printRandomEntriesMap(customersMoneySpent map[int64]float64) {
 */
 
 func calculateQuantiles(data []float64, quantiles []float64) []float64 {
-    result := make([]float64, len(quantiles))
-    for i, q := range quantiles {
-        result[i] = stat.Quantile(q, stat.Empirical, data, nil)
-    }
-    return result
+	result := make([]float64, len(quantiles))
+	for i, q := range quantiles {
+		result[i] = stat.Quantile(q, stat.Empirical, data, nil)
+	}
+	return result
+}
+
+/*
+	Iterate over the sorted slice, to display all of CustomerIDs associated with the Spent
+	example of on entry : CustomerID: 2704903228, Spent: 679198.35
+*/
+
+func printSpentSlice(moneySpentSlice []CustomerSpent) {
+	// Iterate over the sorted slice
+	for _, entry := range moneySpentSlice {
+		fmt.Printf("CustomerID: %d, Spent: %.2f\n", entry.CustomerID, entry.Spent)
+	}
+	printSeparator()
+}
+
+/*
+	Function to print a separator to a better display
+*/
+
+func printSeparator() {
+	fmt.Printf("------------------------------------------------------------\n")
 }
