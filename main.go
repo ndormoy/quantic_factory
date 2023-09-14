@@ -9,7 +9,7 @@ import (
 	// "encoding/csv"
 	// "fmt"
 	"log"
-	"sort"
+	// "sort"
 
 	// "os"
 	// "strings"
@@ -65,13 +65,7 @@ func main() {
 	for i, entry := range moneySpentSlice {
 		spentValues[i] = entry.Spent
 	}
-
-	// Sort the Spent values slice in ascending order
-	sort.Float64s(spentValues)
-	// Sort the moneySpentSlice by Spent in descending order
-	sort.Slice(moneySpentSlice, func(i, j int) bool {
-		return moneySpentSlice[i].Spent < moneySpentSlice[j].Spent
-	})
+	sortMySlices(&spentValues, &moneySpentSlice)
 
 	_, err = createBestClientMap(spentValues, moneySpentSlice)
 	if err != nil {
